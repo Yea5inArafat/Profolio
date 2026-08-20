@@ -49,18 +49,26 @@ document.documentElement.setAttribute('data-theme', theme);
 --radius:10px;
 }
 html[data-theme="dark"]{
---paper:#0D1420;
---paper-alt:#111A29;
---surface:#131C2C;
---surface-2:#182238;
+--paper:#060911;
+--paper-alt:#0B111C;
+--surface:#101929;
+--surface-2:#151F33;
 --ink:#E8ECF3;
 --ink-muted:#9AA8BC;
 --ink-dim:#66748A;
---grid-line:#212D42;
---border:#232F46;
+--grid-line:#1A2438;
+--border:#1F2C45;
 --ac-soft:#0F2A20;
 --wa-soft:#2E1614;
 --pending-soft:#2A2013;
+--glass:rgba(16,25,41,.62);
+--glow-ac:rgba(18,164,84,.35);
+--glow-blue:rgba(47,111,228,.28);
+}
+:root{
+--glass:rgba(255,255,255,.6);
+--glow-ac:rgba(18,164,84,.18);
+--glow-blue:rgba(47,111,228,.14);
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 html{scroll-behavior:smooth;}
@@ -71,7 +79,34 @@ background-image:
 linear-gradient(var(--grid-line) 1px, transparent 1px),
 linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
 background-size:34px 34px;
-transition:background-color .3s ease, color .3s ease;
+transition:background-color .4s ease, color .3s ease;
+}
+html[data-theme="dark"] body{ background-image:none; }
+#bg-canvas{
+position:fixed; inset:0; width:100%; height:100%; z-index:-2; display:block;
+pointer-events:none;
+}
+#bg-nebula{
+position:fixed; inset:0; z-index:-1; pointer-events:none;
+background:
+radial-gradient(ellipse 900px 600px at 15% -5%, var(--glow-ac), transparent 60%),
+radial-gradient(ellipse 800px 700px at 100% 20%, var(--glow-blue), transparent 55%),
+radial-gradient(ellipse 700px 500px at 20% 100%, var(--glow-blue), transparent 55%);
+opacity:.9; transition:opacity .4s ease;
+}
+html[data-theme="light"] #bg-canvas{ opacity:.35; }
+.glass{
+background:var(--glass); backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+border:1px solid var(--border);
+}
+.reveal{opacity:0; transform:translateY(22px); transition:opacity .7s cubic-bezier(.16,.8,.24,1), transform .7s cubic-bezier(.16,.8,.24,1);}
+.reveal.in-view{opacity:1; transform:translateY(0);}
+.tilt{transform-style:preserve-3d; transition:transform .35s cubic-bezier(.16,.8,.24,1), border-color .25s ease, box-shadow .25s ease;}
+@media (prefers-reduced-motion: reduce){
+.reveal{opacity:1; transform:none; transition:none;}
+.tilt{transition:none;}
+#bg-canvas{display:none;}
+#hero-orb{display:none;}
 }
 ::selection{background:var(--ac); color:#fff;}
 a{color:inherit; text-decoration:none;}
@@ -145,10 +180,20 @@ display:flex; align-items:center; gap:10px; margin-bottom:14px;
 .section-title{font-size:clamp(24px,3.4vw,32px); margin-bottom:12px;}
 .section-sub{color:var(--ink-muted); font-size:15px; max-width:600px;}
 .section-head{margin-bottom:44px;}
-#hero{padding-top:150px; padding-bottom:90px;}
+#hero{padding-top:150px; padding-bottom:90px; position:relative;}
+#hero-orb{
+position:absolute; top:-40px; right:-60px; width:520px; height:520px; z-index:0;
+opacity:.55; pointer-events:none;
+mask-image:radial-gradient(circle at 60% 40%, black 40%, transparent 72%);
+-webkit-mask-image:radial-gradient(circle at 60% 40%, black 40%, transparent 72%);
+}
+@media (max-width:900px){ #hero-orb{ width:340px; height:340px; top:-10px; right:-90px; opacity:.4; } }
+@media (max-width:640px){ #hero-orb{ display:none; } }
+.judge-window{ position:relative; z-index:1; }
 .judge-window{
-background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;
-box-shadow:0 24px 50px -30px rgba(16,27,45,.35);
+background:var(--glass); backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);
+border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative;
+box-shadow:0 24px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(18,164,84,.04);
 }
 .judge-topbar{
 display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--border); background:var(--surface-2);
@@ -202,7 +247,7 @@ font-family:var(--font-mono); font-size:11px; padding:3px 8px; margin-left:8px; 
 .contact-info-item a.val-link{color:var(--ink); transition:color .2s ease;}
 .contact-info-item a.val-link:hover{color:var(--ac);}
 .ext-ico{font-size:10px; color:var(--ink-dim); margin-left:2px;}
-.feed-panel{background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:18px; font-family:var(--font-mono); font-size:12.5px; align-self:start;}
+.feed-panel{background:var(--glass); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px; padding:18px; font-family:var(--font-mono); font-size:12.5px; align-self:start;}
 .feed-panel .feed-head{display:flex; justify-content:space-between; color:var(--ink-dim); margin-bottom:12px; font-size:11px; text-transform:uppercase; letter-spacing:.05em;}
 .feed-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed var(--border); color:var(--ink-muted);}
 .feed-row:last-child{border-bottom:none;}
@@ -215,15 +260,22 @@ font-family:var(--font-mono); font-size:11px; padding:3px 8px; margin-left:8px; 
 .stat-box .k{font-size:10.5px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em;}
 .stat-box .v{font-family:var(--font-mono); font-size:19px; font-weight:700; margin-top:3px; color:var(--ink);}
 .card{
-background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-padding:24px; transition:transform .25s ease, border-color .25s ease;
+background:var(--glass); backdrop-filter:blur(12px) saturate(140%); -webkit-backdrop-filter:blur(12px) saturate(140%);
+border:1px solid var(--border); border-radius:var(--radius);
+padding:24px; transition:transform .3s cubic-bezier(.16,.8,.24,1), border-color .25s ease, box-shadow .3s ease;
 }
-.card:hover{transform:translateY(-3px); border-color:var(--ac);}
+.card:hover{transform:translateY(-3px); border-color:var(--ac); box-shadow:0 20px 40px -24px var(--glow-ac);}
 .about-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:36px;}
 .spec-card h4{font-family:var(--font-mono); font-size:13px; color:var(--ac); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;}
 .spec-card p{color:var(--ink-muted); font-size:14.5px;}
 .about-lower{display:grid; grid-template-columns:.85fr 1.15fr; gap:40px; align-items:start;}
-.profile-card{border:1px solid var(--border); border-radius:14px; padding:20px; background:var(--surface);}
+.profile-card{border:1px solid var(--border); border-radius:14px; padding:20px; background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); position:relative;}
+.profile-card::before{
+content:''; position:absolute; inset:-1px; border-radius:14px; padding:1px; z-index:-1;
+background:conic-gradient(from 180deg at 50% 50%, var(--ac), transparent 30%, transparent 70%, var(--ac));
+opacity:0; transition:opacity .4s ease;
+}
+.profile-card:hover::before{opacity:.5;}
 .profile-photo{
 width:100%; aspect-ratio:1/1; border-radius:10px; margin-bottom:16px;
 background:var(--surface-2); overflow:hidden;
@@ -255,7 +307,7 @@ font-size:13px; display:flex; align-items:center; gap:8px; font-family:var(--fon
 .pill .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
 .learning-strip{display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;}
 .learning-pill{font-family:var(--font-mono); font-size:12.5px; padding:8px 14px; border-radius:8px; border:1px dashed var(--pending); color:var(--pending); background:var(--pending-soft);}
-.scoreboard{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface);}
+.scoreboard{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);}
 .sb-head{
 display:grid; grid-template-columns:64px 1fr 110px 130px; gap:14px; padding:12px 20px;
 background:var(--surface-2); font-family:var(--font-mono); font-size:11px; color:var(--ink-dim);
@@ -280,7 +332,8 @@ border-bottom:1px solid var(--border); align-items:center;
 .sb-row{grid-template-columns:1fr; gap:10px;}
 }
 .cp-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-.cp-rating-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:26px; text-align:center;}
+.cp-rating-card{background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:14px; padding:26px; text-align:center; transition:box-shadow .3s ease, border-color .3s ease;}
+.cp-rating-card:hover{border-color:var(--ac); box-shadow:0 20px 44px -26px var(--glow-ac);}
 .cp-rating-card .platform{font-family:var(--font-mono); color:var(--ink-dim); font-size:12px; margin-bottom:8px; text-transform:uppercase; letter-spacing:.05em;}
 .cp-rating-card .rating{font-family:var(--font-mono); font-size:38px; font-weight:800; color:var(--ink);}
 .cp-rating-card .rank{font-family:var(--font-mono); font-size:12.5px; margin-top:4px; padding:3px 10px; border-radius:6px; display:inline-block;}
@@ -304,50 +357,9 @@ border-bottom:1px solid var(--border); align-items:center;
 .tl-item .tl-desc{color:var(--ink-muted); font-size:14px;}
 .tag-row{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
 .tag{font-family:var(--font-mono); font-size:11px; padding:4px 9px; border-radius:5px; background:var(--surface-2); border:1px solid var(--border); color:var(--ink-muted);}
-.universe-shell{
-position:relative; border:1px solid var(--border); border-radius:16px; background:var(--surface);
-overflow:hidden; min-height:380px;
-background-image:radial-gradient(circle at 50% 35%, var(--ac-soft) 0%, transparent 60%);
-}
-.universe-static{padding:44px 24px 30px; text-align:center;}
-.core-badge{
-width:64px; height:64px; margin:0 auto 22px; border-radius:50%;
-display:flex; align-items:center; justify-content:center; font-size:28px; color:var(--ac);
-background:var(--ac-soft); border:1px solid var(--ac);
-animation:corePulse 2.6s ease-in-out infinite;
-}
-@keyframes corePulse{0%,100%{box-shadow:0 0 0 0 rgba(18,164,84,.35);} 50%{box-shadow:0 0 0 14px rgba(18,164,84,0);}}
-.orbit-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:460px; margin:0 auto;}
-.orbit-node-btn{
-display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 8px;
-border:1px solid var(--border); border-radius:12px; background:var(--surface-2);
-font-family:var(--font-mono); font-size:12px; color:var(--ink-muted);
-transition:transform .2s ease, border-color .2s ease, color .2s ease;
-}
-.orbit-node-btn .ico{font-size:18px;}
-.orbit-node-btn:hover{transform:translateY(-3px); border-color:var(--ac); color:var(--ac);}
-.universe-actions{display:flex; justify-content:center; align-items:center; gap:14px; padding:26px 0 8px; flex-wrap:wrap;}
-.universe-hint{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); max-width:320px; text-align:left;}
-.universe-hint{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); max-width:320px; text-align:left;}
-.universe-status{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); text-align:center; padding:0 24px 14px;}
-.universe-tooltip{
-position:absolute; pointer-events:none; z-index:6; opacity:0; transform:translate(-50%,-100%) translateY(-10px);
-transition:opacity .12s ease; background:var(--ink); color:var(--paper); border-radius:8px; padding:9px 12px;
-font-family:var(--font-mono); font-size:11.5px; min-width:140px; box-shadow:0 12px 26px -12px rgba(0,0,0,.5);
-}
-.universe-tooltip.show{opacity:1;}
-.universe-tooltip .tt-name{font-weight:700; margin-bottom:4px;}
-.universe-tooltip .tt-meta{display:flex; gap:10px; color:var(--ink-dim); font-size:10.5px;}
-#universe-canvas{width:100%; height:440px; display:block; touch-action:none; cursor:grab;}
-#universe-canvas:active{cursor:grabbing;}
-#exit-3d-btn{position:absolute; top:14px; right:14px; z-index:5;}
-@media (max-width:560px){
-#universe-canvas{height:320px;}
-.orbit-grid{grid-template-columns:repeat(2,1fr);}
-}
 .resume-box{
 text-align:center; padding:56px 24px; border-radius:16px;
-background:var(--surface); border:1px solid var(--border);
+background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border);
 }
 .resume-box .case-label{justify-content:center;}
 .resume-box h3{font-size:clamp(20px,2.8vw,26px); margin-bottom:12px;}
@@ -417,18 +429,155 @@ transition:opacity .25s ease, transform .25s ease, background .2s ease;
 section{padding:70px 0;}
 #hero{padding-top:120px;}
 }
+
+/* ================= UNIVERSE LAYER ================= */
+#universe-stage{position:fixed; inset:0; z-index:600; pointer-events:none;}
+#universe-canvas{position:fixed; inset:0; width:100%; height:100%; display:block; z-index:1; transition:opacity .6s ease; pointer-events:auto;}
+#universe-stage.landed #universe-canvas{opacity:.28;}
+#universe-hud{position:fixed; inset:0; z-index:2; pointer-events:none;}
+.planet-label{
+position:absolute; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;
+font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink);
+background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+border:1px solid var(--border); border-radius:999px; padding:6px 13px;
+white-space:nowrap; opacity:0; transition:opacity .3s ease, transform .2s ease, border-color .2s ease;
+}
+.planet-label.visible{opacity:.92;}
+.planet-label:hover{border-color:var(--ac); transform:translate(-50%,-50%) scale(1.06);}
+.planet-label .dot{display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:7px; vertical-align:middle;}
+#universe-topbar{
+position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:920; pointer-events:auto;
+display:flex; gap:8px; align-items:center; font-family:var(--font-mono); font-size:11.5px;
+}
+#universe-topbar button{
+background:var(--glass); backdrop-filter:blur(10px); border:1px solid var(--border); color:var(--ink-muted);
+padding:8px 14px; border-radius:999px; font-family:var(--font-mono); font-size:11.5px; transition:color .2s ease, border-color .2s ease;
+}
+#universe-topbar button:hover{color:var(--ac); border-color:var(--ac);}
+#universe-topbar button.primary{color:var(--ac); border-color:var(--ac);}
+#return-universe-btn{
+position:fixed; top:14px; right:16px; z-index:920; pointer-events:auto; display:none;
+background:var(--glass); backdrop-filter:blur(10px); border:1px solid var(--ac); color:var(--ac);
+font-family:var(--font-mono); font-size:12px; padding:9px 16px; border-radius:999px;
+}
+#universe-stage.landed ~ #return-universe-btn, body.landed #return-universe-btn{display:inline-flex; align-items:center; gap:6px;}
+#universe-loading{
+position:fixed; inset:0; z-index:950; background:var(--paper); display:flex; flex-direction:column;
+align-items:center; justify-content:center; gap:22px; text-align:center; padding:24px;
+transition:opacity .5s ease, visibility .5s ease;
+}
+#universe-loading.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+#universe-loading .ul-title{font-family:var(--font-mono); font-size:13px; letter-spacing:.14em; color:var(--ac);}
+#universe-loading .ul-name{font-family:var(--font-mono); font-size:clamp(26px,6vw,44px); font-weight:800; color:var(--ink);}
+#universe-loading .ul-steps{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); display:flex; flex-direction:column; gap:6px; min-width:260px;}
+#universe-loading .ul-step{display:flex; justify-content:space-between; opacity:.4; transition:opacity .3s ease;}
+#universe-loading .ul-step.done{opacity:1; color:var(--ac);}
+#universe-loading .ul-bar{width:min(320px,80vw); height:3px; background:var(--surface-2); border-radius:99px; overflow:hidden;}
+#universe-loading .ul-bar-fill{height:100%; width:0%; background:var(--ac); transition:width .25s ease;}
+#universe-loading .ul-actions{display:flex; gap:12px; margin-top:6px;}
+#universe-loading .ul-actions button{opacity:0; pointer-events:none; transition:opacity .3s ease;}
+#universe-loading.ready .ul-actions button{opacity:1; pointer-events:auto;}
+#cmdk-overlay, #terminal-overlay{
+position:fixed; inset:0; z-index:970; background:rgba(6,9,17,.55); backdrop-filter:blur(4px);
+display:none; align-items:flex-start; justify-content:center; padding-top:14vh;
+}
+#cmdk-overlay.open, #terminal-overlay.open{display:flex;}
+#cmdk-box, #terminal-box{
+width:min(560px,90vw); background:var(--glass); backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%);
+border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -30px rgba(0,0,0,.6);
+}
+#cmdk-input{width:100%; background:transparent; border:none; border-bottom:1px solid var(--border); color:var(--ink);
+font-family:var(--font-mono); font-size:15px; padding:16px 18px; outline:none;}
+#cmdk-list{max-height:320px; overflow-y:auto; padding:8px;}
+.cmdk-item{display:flex; justify-content:space-between; padding:10px 12px; border-radius:8px; font-family:var(--font-mono); font-size:13px; color:var(--ink-muted); cursor:pointer;}
+.cmdk-item.active, .cmdk-item:hover{background:var(--surface-2); color:var(--ink);}
+.cmdk-item .hint{color:var(--ink-dim); font-size:11px;}
+#terminal-box{font-family:var(--font-mono); font-size:12.5px;}
+#terminal-log{height:280px; overflow-y:auto; padding:14px 16px; color:var(--ink-muted); white-space:pre-wrap; line-height:1.7;}
+#terminal-log .t-cmd{color:var(--ac);}
+#terminal-log .t-err{color:var(--wa);}
+#terminal-input-row{display:flex; align-items:center; gap:8px; border-top:1px solid var(--border); padding:10px 16px;}
+#terminal-input-row span{color:var(--ac);}
+#terminal-input{flex:1; background:transparent; border:none; outline:none; color:var(--ink); font-family:var(--font-mono); font-size:12.5px;}
+.quality-badge{
+position:fixed; bottom:14px; left:14px; z-index:920; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim);
+background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:999px; padding:5px 11px; pointer-events:auto;
+}
+.gh-repo-card{display:flex; flex-direction:column; gap:8px;}
+.gh-repo-card .gh-name{font-family:var(--font-mono); font-weight:700; font-size:14.5px; color:var(--ac);}
+.gh-repo-card .gh-desc{color:var(--ink-muted); font-size:13px;}
+.gh-repo-meta{display:flex; gap:14px; flex-wrap:wrap; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim);}
+.gh-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px; margin-top:24px;}
+.cf-chart-wrap{margin-top:20px; padding:18px; background:var(--glass); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px;}
+.cf-chart-wrap svg{width:100%; height:120px; display:block;}
+.cf-chart-label{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); margin-bottom:10px; text-transform:uppercase; letter-spacing:.05em;}
+@media (max-width:640px){
+.planet-label{font-size:10px; padding:5px 10px;}
+#universe-topbar{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+#universe-canvas{display:none;}
+.planet-label{position:static; opacity:1; display:inline-flex; margin:4px;}
+}
 </style>
 </head>
 <body>
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div id="bg-nebula" aria-hidden="true"></div>
 <div id="scroll-progress"></div>
+
+<!-- Universe loading / intro sequence -->
+<div id="universe-loading" role="status" aria-live="polite">
+<div class="ul-title">INITIALIZING UNIVERSE</div>
+<div class="ul-name">MD. YEASIN ARAFAT</div>
+<div class="ul-bar"><div class="ul-bar-fill" id="ul-bar-fill"></div></div>
+<div class="ul-steps">
+<div class="ul-step" id="ul-step-scene"><span>Identity core</span><span>—</span></div>
+<div class="ul-step" id="ul-step-planets"><span>Orbiting worlds</span><span>—</span></div>
+<div class="ul-step" id="ul-step-field"><span>Star field</span><span>—</span></div>
+<div class="ul-step" id="ul-step-data"><span>Live data links</span><span>—</span></div>
+</div>
+<div class="ul-actions">
+<button class="btn btn-primary" id="enter-universe-btn">ENTER THE UNIVERSE</button>
+<button class="btn btn-ghost" id="skip-universe-btn">Skip — classic view</button>
+</div>
+</div>
+
+<!-- 3D universe canvas + HUD (sits over the real, accessible page) -->
+<div id="universe-stage" aria-hidden="true">
+<canvas id="universe-canvas"></canvas>
+<div id="universe-hud"></div>
+</div>
+<div id="universe-topbar" role="navigation" aria-label="Universe navigation">
+<button id="cmdk-open-btn" title="Command palette (Ctrl+K)">⌘K Search</button>
+<button id="terminal-open-btn" title="Open terminal">Terminal</button>
+</div>
+<button id="return-universe-btn">↺ Return to Universe</button>
+<div class="quality-badge" id="quality-badge">quality: auto</div>
+
+<!-- Command palette -->
+<div id="cmdk-overlay" role="dialog" aria-modal="true" aria-label="Command palette">
+<div id="cmdk-box">
+<input id="cmdk-input" type="text" placeholder="Type a command… (about, projects, skills, github, codeforces, education, resume, contact, theme, terminal)" autocomplete="off" />
+<div id="cmdk-list"></div>
+</div>
+</div>
+
+<!-- Terminal easter egg -->
+<div id="terminal-overlay" role="dialog" aria-modal="true" aria-label="Developer terminal">
+<div id="terminal-box">
+<div id="terminal-log"></div>
+<div id="terminal-input-row"><span>&gt;</span><input id="terminal-input" type="text" autocomplete="off" placeholder="type 'help'" /></div>
+</div>
+</div>
 <nav id="navbar">
 <div class="container nav-inner">
 <a href="#hero" class="brand">YEA5IN ARAFAT <span class="verdict">AC</span></a>
 <ul class="nav-links">
-<li><a href="#universe">universe</a></li>
 <li><a href="#about">problem</a></li>
 <li><a href="#skills">tags</a></li>
 <li><a href="#projects">scoreboard</a></li>
+<li><a href="#github">repos</a></li>
 <li><a href="#cp">rating</a></li>
 <li><a href="#log">log</a></li>
 <li><a href="#contact">submit</a></li>
@@ -442,17 +591,18 @@ section{padding:70px 0;}
 </nav>
 <div id="mobile-menu">
 <a href="#hero">problem</a>
-<a href="#universe">universe</a>
 <a href="#about">about</a>
 <a href="#skills">tags</a>
 <a href="#projects">scoreboard</a>
+<a href="#github">repos</a>
 <a href="#cp">rating</a>
 <a href="#log">log</a>
 <a href="#contact">submit</a>
 </div>
 <section id="hero">
+<canvas id="hero-orb" aria-hidden="true"></canvas>
 <div class="container">
-<div class="judge-window">
+<div class="judge-window tilt">
 <div class="judge-topbar">
 <span class="dot"></span><span class="dot"></span><span class="dot"></span>
 <span class="path">judge.local/problem/arafat</span>
@@ -507,36 +657,6 @@ toward Codeforces Expert.
 <p id="cf-live-note-hero" style="margin-top:12px; color:var(--ink-dim); font-size:11px;">Loading live stats from Codeforces…</p>
 </div>
 </div>
-</div>
-</div>
-</section>
-<section id="universe" aria-label="Interactive 3D developer universe">
-<div class="container">
-<div class="section-head">
-<div class="case-label"><span class="id">case_000</span> / universe.render</div>
-<h2 class="section-title">Arafat Dev Universe</h2>
-<p class="section-sub">A small interactive map of this site — orbit the core, then click a node to jump straight to that section.</p>
-</div>
-<div class="universe-shell" id="universe-shell">
-<button class="btn btn-ghost btn-sm" id="exit-3d-btn" style="display:none;">Exit 3D</button>
-<canvas id="universe-canvas" style="display:none;" aria-hidden="true"></canvas>
-<div class="universe-static" id="universe-static">
-<div class="core-badge">◉</div>
-<div class="orbit-grid" id="orbit-grid-fallback">
-<button class="orbit-node-btn" data-target="#projects"><span class="ico">💻</span><span>Projects</span></button>
-<button class="orbit-node-btn" data-target="#skills"><span class="ico">🧩</span><span>Tags</span></button>
-<button class="orbit-node-btn" data-target="#cp"><span class="ico">🏆</span><span>CP</span></button>
-<button class="orbit-node-btn" data-target="#log"><span class="ico">📚</span><span>Log</span></button>
-<button class="orbit-node-btn" data-target="#about"><span class="ico">👤</span><span>About</span></button>
-<button class="orbit-node-btn" data-target="#contact"><span class="ico">✉️</span><span>Contact</span></button>
-</div>
-<div class="universe-actions">
-<button class="btn btn-primary" id="enter-3d-btn">Enter 3D experience</button>
-<span class="universe-hint" id="universe-hint">Static quick-nav shown by default — works everywhere, no WebGL needed.</span>
-</div>
-</div>
-<p class="universe-status" id="gh-constellation-status">🐙 Loading GitHub repositories for the constellation…</p>
-<div class="universe-tooltip" id="universe-tooltip"><div class="tt-name"></div><div class="tt-meta"></div></div>
 </div>
 </div>
 </section>
@@ -687,6 +807,17 @@ toward Codeforces Expert.
 </div>
 </div>
 </section>
+<section id="github">
+<div class="container">
+<div class="section-head">
+<div class="case-label"><span class="id">case_003b</span> / repos.live</div>
+<h2 class="section-title">GitHub, live</h2>
+<p class="section-sub">Pulled directly from the GitHub API for <a href="https://github.com/Yea5inArafat" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ac); font-weight:600;">github.com/Yea5inArafat ↗</a> — nothing here is invented; if the API is unavailable this section says so.</p>
+</div>
+<div id="gh-status" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim);">Loading repositories…</div>
+<div class="gh-grid" id="gh-grid"></div>
+</div>
+</section>
 <section id="cp">
 <div class="container">
 <div class="section-head">
@@ -706,6 +837,10 @@ toward Codeforces Expert.
 <div><b>14</b>topics practiced</div>
 </div>
 <p id="cf-live-note" style="margin-top:14px; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim);">Loading live stats from Codeforces…</p>
+<div class="cf-chart-wrap" id="cf-chart-wrap" style="display:none;">
+<div class="cf-chart-label">Rating trajectory — live, per contest</div>
+<svg id="cf-chart-svg" viewBox="0 0 300 100" preserveAspectRatio="none"></svg>
+</div>
 </div>
 <div class="cp-goal-card">
 <h4>Focus areas</h4>
@@ -905,311 +1040,6 @@ mmenu.classList.remove('open');
 mbtn.setAttribute('aria-expanded', 'false');
 }));
 
-// GitHub constellation data — fetched once on load (real repos, no fake
-// numbers), reused by the 3D universe. Left null and reported honestly if
-// the request fails, same pattern as the Codeforces widget above.
-let ghRepoData = null;
-let ghRepoStatusMsg = 'Loading GitHub repositories for the constellation…';
-(function fetchGithubConstellationData(){
-const USER = 'Yea5inArafat';
-fetch(`https://api.github.com/users/${USER}/repos?per_page=100&sort=updated`)
-.then(r => { if (!r.ok) throw new Error('bad response'); return r.json(); })
-.then(repos => {
-const real = repos.filter(r => !r.fork).sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 10);
-ghRepoData = real;
-ghRepoStatusMsg = real.length
-? `🐙 GitHub constellation: ${real.length} real repositor${real.length === 1 ? 'y' : 'ies'} from github.com/${USER}`
-: `🐙 No public repositories found yet for github.com/${USER}`;
-document.dispatchEvent(new CustomEvent('gh-constellation-ready'));
-})
-.catch(() => {
-ghRepoStatusMsg = `🐙 GitHub data unavailable right now · github.com/${USER}`;
-document.dispatchEvent(new CustomEvent('gh-constellation-ready'));
-});
-})();
-
-// Arafat Dev Universe — small interactive 3D map of the site.
-// Loads on demand (never on page load), and only when the device/user
-// preference actually supports it well. Everyone else gets the same
-// click-to-navigate grid, just without WebGL.
-(function initUniverse(){
-const NAV_NODES = [
-{ label: 'Projects', icon: '💻', target: '#projects' },
-{ label: 'Tags', icon: '🧩', target: '#skills' },
-{ label: 'CP', icon: '🏆', target: '#cp' },
-{ label: 'Log', icon: '📚', target: '#log' },
-{ label: 'About', icon: '👤', target: '#about' },
-{ label: 'Contact', icon: '✉️', target: '#contact' },
-];
-
-document.querySelectorAll('.orbit-node-btn').forEach(btn => {
-btn.addEventListener('click', () => {
-const target = document.querySelector(btn.getAttribute('data-target'));
-if (target) target.scrollIntoView({ behavior: 'smooth' });
-});
-});
-
-const enterBtn = document.getElementById('enter-3d-btn');
-const exitBtn = document.getElementById('exit-3d-btn');
-const staticView = document.getElementById('universe-static');
-const canvas = document.getElementById('universe-canvas');
-const hint = document.getElementById('universe-hint');
-const statusEl = document.getElementById('gh-constellation-status');
-const tooltip = document.getElementById('universe-tooltip');
-const shell = document.getElementById('universe-shell');
-if (!enterBtn || !canvas) return;
-
-function refreshStatus(){ if (statusEl) statusEl.textContent = ghRepoStatusMsg; }
-refreshStatus();
-document.addEventListener('gh-constellation-ready', refreshStatus);
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isSmallScreen = window.innerWidth < 760;
-
-if (prefersReducedMotion || isSmallScreen){
-enterBtn.disabled = true;
-enterBtn.classList.add('btn-disabled');
-enterBtn.classList.remove('btn-primary');
-hint.textContent = isSmallScreen
-? '3D is skipped on smaller screens to keep things fast — tap a card above to jump straight there.'
-: '3D is skipped because your system prefers reduced motion — use the quick-nav grid above.';
-return;
-}
-
-let rafId = null;
-let scene, camera, renderer, group;
-let interactiveMeshes = []; // both nav nodes and repo stars, unified for raycasting
-let starMeshes = []; // repo stars only, for the twinkle animation
-let mouseX = 0, mouseY = 0;
-let hovered = null;
-
-document.addEventListener('gh-constellation-ready', () => {
-if (scene && !starMeshes.length && ghRepoData && ghRepoData.length){
-buildGithubConstellation();
-}
-});
-
-function loadThree(cb){
-if (window.THREE){ cb(); return; }
-const s = document.createElement('script');
-s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-s.onload = cb;
-s.onerror = () => { hint.textContent = 'Could not load the 3D library — staying on the quick-nav grid.'; };
-document.body.appendChild(s);
-}
-
-function makeLabelSprite(text){
-const c = document.createElement('canvas');
-c.width = 256; c.height = 64;
-const ctx = c.getContext('2d');
-ctx.font = '600 34px monospace';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillStyle = '#E8ECF3';
-ctx.fillText(text, 128, 32);
-const tex = new THREE.CanvasTexture(c);
-const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
-const sprite = new THREE.Sprite(mat);
-sprite.scale.set(2.2, 0.55, 1);
-return sprite;
-}
-
-// Deterministic hash → hue, so a given language always gets the same colour.
-function languageColor(lang){
-if (!lang) return 0x8695A7;
-let hash = 0;
-for (let i = 0; i < lang.length; i++) hash = (hash * 31 + lang.charCodeAt(i)) >>> 0;
-const hue = (hash % 360) / 360;
-return new THREE.Color().setHSL(hue, 0.6, 0.6).getHex();
-}
-
-function buildNavNodes(){
-const radius = 3.1;
-NAV_NODES.forEach((n, i) => {
-const angle = (i / NAV_NODES.length) * Math.PI * 2;
-const nodeGroup = new THREE.Group();
-nodeGroup.position.set(Math.cos(angle) * radius, Math.sin(angle * 1.3) * 0.6, Math.sin(angle) * radius);
-
-const geo = new THREE.SphereGeometry(0.22, 16, 16);
-const mat = new THREE.MeshBasicMaterial({ color: 0xE8ECF3 });
-const mesh = new THREE.Mesh(geo, mat);
-mesh.userData = { type: 'nav', target: n.target, label: n.label };
-nodeGroup.add(mesh);
-
-const label = makeLabelSprite(n.icon + ' ' + n.label);
-label.position.set(0, 0.55, 0);
-nodeGroup.add(label);
-
-group.add(nodeGroup);
-interactiveMeshes.push(mesh);
-});
-}
-
-// Repos scattered as a starfield ring further out than the nav nodes,
-// each a real repository — hover for details, click opens it on GitHub.
-function buildGithubConstellation(){
-if (!ghRepoData || !ghRepoData.length) return;
-const n = ghRepoData.length;
-ghRepoData.forEach((repo, i) => {
-const phi = Math.acos(1 - 2 * (i + 0.5) / n);
-const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-const radius = 4.6;
-const x = radius * Math.sin(phi) * Math.cos(theta);
-const y = radius * Math.cos(phi) * 0.7;
-const z = radius * Math.sin(phi) * Math.sin(theta);
-
-const color = languageColor(repo.language);
-const geo = new THREE.SphereGeometry(0.11, 12, 12);
-const mat = new THREE.MeshBasicMaterial({ color });
-const star = new THREE.Mesh(geo, mat);
-star.position.set(x, y, z);
-star.userData = {
-type: 'repo',
-name: repo.name,
-language: repo.language || 'N/A',
-stars: repo.stargazers_count,
-url: repo.html_url,
-baseScale: 1,
-};
-
-const glowGeo = new THREE.SphereGeometry(0.2, 10, 10);
-const glowMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18 });
-const glow = new THREE.Mesh(glowGeo, glowMat);
-star.add(glow);
-
-group.add(star);
-interactiveMeshes.push(star);
-starMeshes.push(star);
-});
-}
-
-function buildScene(){
-const width = canvas.clientWidth, height = 440;
-scene = new THREE.Scene();
-camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
-camera.position.set(0, 0, 8);
-
-renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(width, height);
-
-group = new THREE.Group();
-scene.add(group);
-
-const coreGeo = new THREE.IcosahedronGeometry(1.1, 1);
-const coreMat = new THREE.MeshBasicMaterial({ color: 0x12A454, wireframe: true });
-group.add(new THREE.Mesh(coreGeo, coreMat));
-
-const glowGeo = new THREE.IcosahedronGeometry(1.4, 1);
-const glowMat = new THREE.MeshBasicMaterial({ color: 0x12A454, wireframe: true, transparent: true, opacity: 0.15 });
-group.add(new THREE.Mesh(glowGeo, glowMat));
-
-buildNavNodes();
-buildGithubConstellation();
-
-canvas.addEventListener('mousemove', onMouseMove);
-canvas.addEventListener('click', onClick);
-canvas.addEventListener('touchstart', onTouch, { passive: true });
-window.addEventListener('resize', onResize);
-}
-
-function raycastAt(clientX, clientY){
-const rect = canvas.getBoundingClientRect();
-const ndc = new THREE.Vector2(
-((clientX - rect.left) / rect.width) * 2 - 1,
--((clientY - rect.top) / rect.height) * 2 + 1
-);
-const raycaster = new THREE.Raycaster();
-raycaster.setFromCamera(ndc, camera);
-const hits = raycaster.intersectObjects(interactiveMeshes);
-return hits.length ? hits[0].object : null;
-}
-
-function showTooltip(obj, clientX, clientY){
-const rect = shell.getBoundingClientRect();
-tooltip.style.left = (clientX - rect.left) + 'px';
-tooltip.style.top = (clientY - rect.top) + 'px';
-if (obj.userData.type === 'repo'){
-tooltip.querySelector('.tt-name').textContent = '📦 ' + obj.userData.name;
-tooltip.querySelector('.tt-meta').textContent = `${obj.userData.language} · ⭐ ${obj.userData.stars}`;
-} else {
-tooltip.querySelector('.tt-name').textContent = obj.userData.label;
-tooltip.querySelector('.tt-meta').textContent = 'Click to jump to this section';
-}
-tooltip.classList.add('show');
-}
-function hideTooltip(){ tooltip.classList.remove('show'); }
-
-function onMouseMove(e){
-const rect = canvas.getBoundingClientRect();
-mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-mouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-
-const obj = raycastAt(e.clientX, e.clientY);
-if (obj){
-canvas.style.cursor = 'pointer';
-hovered = obj;
-showTooltip(obj, e.clientX, e.clientY);
-} else {
-canvas.style.cursor = 'grab';
-hovered = null;
-hideTooltip();
-}
-}
-
-function activate(obj){
-if (!obj) return;
-if (obj.userData.type === 'repo'){
-window.open(obj.userData.url, '_blank', 'noopener,noreferrer');
-} else if (obj.userData.type === 'nav'){
-const target = document.querySelector(obj.userData.target);
-if (target) target.scrollIntoView({ behavior: 'smooth' });
-}
-}
-
-function onClick(e){ activate(raycastAt(e.clientX, e.clientY)); }
-function onTouch(e){ if (e.touches[0]) activate(raycastAt(e.touches[0].clientX, e.touches[0].clientY)); }
-
-function onResize(){
-if (!renderer) return;
-const width = canvas.clientWidth, height = canvas.clientHeight;
-camera.aspect = width / height;
-camera.updateProjectionMatrix();
-renderer.setSize(width, height, false);
-}
-
-function animate(){
-rafId = requestAnimationFrame(animate);
-group.rotation.y += 0.0025;
-group.rotation.x += (mouseY * 0.3 - group.rotation.x) * 0.04;
-group.rotation.y += (mouseX * 0.3) * 0.001;
-const t = Date.now() * 0.001;
-starMeshes.forEach((s, i) => {
-const pulse = 1 + Math.sin(t * 1.6 + i) * 0.25;
-s.scale.setScalar(hovered === s ? 1.6 : pulse);
-});
-renderer.render(scene, camera);
-}
-
-enterBtn.addEventListener('click', () => {
-staticView.style.display = 'none';
-canvas.style.display = 'block';
-exitBtn.style.display = 'inline-flex';
-loadThree(() => {
-if (!scene) buildScene();
-animate();
-});
-});
-
-exitBtn.addEventListener('click', () => {
-if (rafId) cancelAnimationFrame(rafId);
-canvas.style.display = 'none';
-exitBtn.style.display = 'none';
-staticView.style.display = 'block';
-hideTooltip();
-});
-})();
-
 const themeBtn = document.getElementById('theme-toggle');
 const root = document.documentElement;
 // Initial theme is already set by the head script (saved choice > system
@@ -1363,6 +1193,33 @@ if (el && (el.textContent === 'Loading…' || el.textContent === '—')) el.text
 });
 }
 
+function renderRatingTrajectory(contests){
+// Draws the real per-contest rating history returned by the Codeforces API
+// as an SVG polyline — a 3D-feeling "trajectory" replacing a flat number,
+// built entirely from live data. No synthetic points are added.
+const wrap = document.getElementById('cf-chart-wrap');
+const svg = document.getElementById('cf-chart-svg');
+if (!wrap || !svg || !contests || !contests.length) return;
+const ratings = contests.map(c => c.newRating);
+const min = Math.min(...ratings), max = Math.max(...ratings);
+const pad = Math.max(20, (max - min) * 0.15);
+const lo = min - pad, hi = max + pad;
+const w = 300, h = 100;
+const pts = ratings.map((r, i) => {
+const x = ratings.length === 1 ? w / 2 : (i / (ratings.length - 1)) * w;
+const y = h - ((r - lo) / (hi - lo)) * h;
+return `${x.toFixed(1)},${y.toFixed(1)}`;
+});
+const lastUp = ratings.length < 2 || ratings[ratings.length - 1] >= ratings[ratings.length - 2];
+const stroke = lastUp ? '#12A454' : '#D6483F';
+svg.innerHTML =
+`<polyline points="${pts.join(' ')}" fill="none" stroke="${stroke}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />` +
+pts.map((p, i) => i === pts.length - 1
+? `<circle cx="${p.split(',')[0]}" cy="${p.split(',')[1]}" r="3.2" fill="${stroke}" />`
+: '').join('');
+wrap.style.display = 'block';
+}
+
 function fetchStats(){
 fetch(`https://codeforces.com/api/user.info?handles=${HANDLE}`)
 .then(r => r.json())
@@ -1399,6 +1256,7 @@ return fetch(`https://codeforces.com/api/user.rating?handle=${HANDLE}`)
 if (rd.status === 'OK'){
 setText('cf-contests', rd.result.length);
 setText('cf-contests-hero', rd.result.length);
+renderRatingTrajectory(rd.result);
 }
 })
 .catch(() => { /* contest count is a nice-to-have; rating card still stands */ });
@@ -1421,6 +1279,753 @@ setText('cf-solved', solved.size);
 
 fetchStats();
 setInterval(fetchStats, REFRESH_MS);
+})();
+
+// Live GitHub repositories for github.com/Yea5inArafat — real API data only.
+// Loading / error / rate-limit states are all shown honestly; nothing is
+// ever substituted with placeholder repos.
+(function loadGitHubRepos(){
+const USER = 'Yea5inArafat';
+const statusEl = document.getElementById('gh-status');
+const gridEl = document.getElementById('gh-grid');
+if (!statusEl || !gridEl) return;
+
+const langColor = {
+JavaScript:'#E8C547', TypeScript:'#2F6FE4', Python:'#12A454', Kotlin:'#8A44D8',
+HTML:'#D6483F', CSS:'#2F6FE4', C:'#66748A', 'C++':'#0FA3A3', Java:'#C98A1A'
+};
+
+fetch(`https://api.github.com/users/${USER}/repos?sort=updated&per_page=12`, {
+headers: { 'Accept': 'application/vnd.github+json' }
+})
+.then(r => {
+if (r.status === 403) throw new Error('rate-limited');
+if (!r.ok) throw new Error('http-' + r.status);
+return r.json();
+})
+.then(repos => {
+if (!Array.isArray(repos) || repos.length === 0){
+statusEl.textContent = 'No public repositories returned by the GitHub API right now.';
+return;
+}
+statusEl.textContent = `${repos.length} public repositories · live from the GitHub API`;
+gridEl.innerHTML = repos.map(repo => {
+const lang = repo.language || null;
+const color = lang && langColor[lang] ? langColor[lang] : 'var(--ink-dim)';
+const updated = repo.updated_at ? new Date(repo.updated_at).toLocaleDateString('en-GB', { year:'numeric', month:'short', day:'numeric' }) : '—';
+const desc = repo.description ? repo.description.replace(/[<>]/g, '') : 'No description provided.';
+return `<div class="card gh-repo-card" data-planet-content="github">
+<div class="gh-name">${repo.name}</div>
+<div class="gh-desc">${desc}</div>
+<div class="gh-repo-meta">
+${lang ? `<span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;"></span>${lang}</span>` : ''}
+<span>★ ${repo.stargazers_count}</span>
+<span>⑂ ${repo.forks_count}</span>
+<span>Updated ${updated}</span>
+</div>
+<a class="btn btn-ghost btn-sm" href="${repo.html_url}" target="_blank" rel="noopener noreferrer" style="align-self:flex-start;">View repo</a>
+</div>`;
+}).join('');
+})
+.catch(err => {
+const msg = err && err.message === 'rate-limited'
+? 'GitHub API rate limit reached — try again in a few minutes, or view the profile directly.'
+: 'GitHub data unavailable right now — view the profile directly.';
+statusEl.innerHTML = `${msg} <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a>`;
+});
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function initUniverse(){
+'use strict';
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+const isSmall = window.innerWidth < 640;
+const isLowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+
+/* ---------- Scroll-reveal ---------- */
+(function reveal(){
+const targets = document.querySelectorAll(
+'.section-head, .spec-card, .counter-grid, .skills-tabs, .learning-strip, ' +
+'.scoreboard, #projects .card, #cp .cp-rating-card, #cp .cp-goal-card, ' +
+'.tl-item, .resume-box, .contact-grid > div, .profile-card'
+);
+if (reduceMotion){ targets.forEach(t => t.classList.add('reveal', 'in-view')); return; }
+targets.forEach(t => t.classList.add('reveal'));
+const io = new IntersectionObserver((entries) => {
+entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+targets.forEach(t => io.observe(t));
+})();
+
+/* ---------- 3D tilt on key panels ---------- */
+(function tilt(){
+if (isTouch || reduceMotion) return;
+const els = document.querySelectorAll('.judge-window, .profile-card, .cp-rating-card, #projects .sb-row, #projects .card');
+els.forEach(el => {
+el.classList.add('tilt');
+el.addEventListener('mousemove', (e) => {
+const r = el.getBoundingClientRect();
+const px = (e.clientX - r.left) / r.width - 0.5;
+const py = (e.clientY - r.top) / r.height - 0.5;
+el.style.transform = `perspective(900px) rotateX(${(-py * 4).toFixed(2)}deg) rotateY(${(px * 4).toFixed(2)}deg) translateZ(0)`;
+});
+el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+});
+})();
+
+/* ---------- Verdict Field: 3D starfield background ---------- */
+if (typeof THREE === 'undefined') return; // graceful no-op if CDN is blocked
+if (reduceMotion){
+document.getElementById('bg-canvas').style.display = 'none';
+} else (function starfield(){
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmall ? 1.5 : 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+camera.position.z = 480;
+
+// Point field: most points are dim "unsolved" stars; a small share are
+// bright accepted-green points, echoing the site's own AC-verdict colour —
+// not decorative space dust, but the same palette the scoreboard uses.
+const COUNT = isSmall ? 380 : (isLowPower ? 700 : 1400);
+const positions = new Float32Array(COUNT * 3);
+const colors = new Float32Array(COUNT * 3);
+const dim = new THREE.Color('#4a5b78');
+const bright = new THREE.Color('#12A454');
+const blue = new THREE.Color('#2F6FE4');
+for (let i = 0; i < COUNT; i++){
+const radius = 300 + Math.random() * 900;
+const theta = Math.random() * Math.PI * 2;
+const phi = Math.acos((Math.random() * 2) - 1);
+positions[i*3]     = radius * Math.sin(phi) * Math.cos(theta);
+positions[i*3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+positions[i*3 + 2] = radius * Math.cos(phi) - 200;
+
+const roll = Math.random();
+const c = roll > 0.93 ? bright : (roll > 0.86 ? blue : dim);
+colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+}
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+const mat = new THREE.PointsMaterial({ size: 2.1, vertexColors: true, transparent: true, opacity: 0.85, sizeAttenuation: true });
+const points = new THREE.Points(geo, mat);
+scene.add(points);
+
+let targetX = 0, targetY = 0, curX = 0, curY = 0;
+window.addEventListener('mousemove', (e) => {
+targetX = (e.clientX / window.innerWidth - 0.5);
+targetY = (e.clientY / window.innerHeight - 0.5);
+}, { passive: true });
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+clearTimeout(resizeTimer);
+resizeTimer = setTimeout(() => {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+}, 150);
+});
+
+let running = true;
+document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+function animate(){
+if (running){
+curX += (targetX - curX) * 0.04;
+curY += (targetY - curY) * 0.04;
+points.rotation.y += 0.00035;
+points.rotation.x = curY * 0.25;
+camera.position.x += (curX * 60 - camera.position.x) * 0.03;
+camera.position.y += (-curY * 60 - camera.position.y) * 0.03;
+camera.lookAt(scene.position);
+renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+}
+animate();
+})();
+
+/* ---------- Hero kernel: a rotating wireframe judge-core ---------- */
+if (!isSmall && !reduceMotion) (function heroOrb(){
+const canvas = document.getElementById('hero-orb');
+if (!canvas) return;
+const width = canvas.parentElement ? canvas.parentElement.clientWidth : 520;
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const size = canvas.getBoundingClientRect().width || 520;
+renderer.setSize(size, size);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 1000);
+camera.position.z = 260;
+
+const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+const wireColor = () => isDark() ? 0x12A454 : 0x2F6FE4;
+
+const group = new THREE.Group();
+const outer = new THREE.Mesh(
+new THREE.IcosahedronGeometry(88, 1),
+new THREE.MeshBasicMaterial({ color: wireColor(), wireframe: true, transparent: true, opacity: 0.55 })
+);
+const inner = new THREE.Mesh(
+new THREE.IcosahedronGeometry(56, 0),
+new THREE.MeshBasicMaterial({ color: wireColor(), wireframe: true, transparent: true, opacity: 0.3 })
+);
+group.add(outer, inner);
+scene.add(group);
+
+// re-tint the kernel when the theme toggles, instead of ignoring it
+const themeBtnEl = document.getElementById('theme-toggle');
+if (themeBtnEl) themeBtnEl.addEventListener('click', () => {
+outer.material.color.set(wireColor());
+inner.material.color.set(wireColor());
+});
+
+function animate(){
+group.rotation.y += 0.0018;
+group.rotation.x += 0.0007;
+inner.rotation.y -= 0.003;
+renderer.render(scene, camera);
+requestAnimationFrame(animate);
+}
+animate();
+})();
+})();
+</script>
+<script>
+/* =========================================================================
+   THE UNIVERSE — 3D primary navigation layer.
+   Real sections already in the DOM (#about, #skills, #projects, #github,
+   #cp, #education, #resume, #contact) are the single source of truth for
+   content. This module never invents copy — it only flies a camera around
+   8 real planets and, on arrival, scrolls to + reveals the matching real
+   section underneath. If WebGL/Three.js is unavailable, it quietly hands
+   control back to the already-complete 2D glass site built above.
+   ========================================================================= */
+(function Universe(){
+'use strict';
+
+const $ = (sel) => document.querySelector(sel);
+const body = document.body;
+
+/* ---------- Environment checks ---------- */
+function webglAvailable(){
+try {
+const c = document.createElement('canvas');
+return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+} catch (e) { return false; }
+}
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+const isSmall = window.innerWidth < 780;
+const cores = navigator.hardwareConcurrency || 4;
+
+function enterClassicMode(){
+// The honest fallback: hide the universe chrome entirely, leave the
+// already-built accessible glass site (from the layer above) as-is.
+document.getElementById('universe-loading').classList.add('hidden');
+document.getElementById('universe-stage').style.display = 'none';
+document.getElementById('universe-topbar').style.display = 'none';
+document.getElementById('return-universe-btn').style.display = 'none';
+document.getElementById('quality-badge').style.display = 'none';
+body.classList.add('classic-mode');
+}
+
+if (typeof THREE === 'undefined' || !webglAvailable()){
+enterClassicMode();
+return;
+}
+
+/* ---------- Sections → planets (real anchors only) ---------- */
+const SECTIONS = [
+{ id:'about',    label:'ABOUT',       color:0x12A454, radius:150, speed:0.09,  incline:0.10 },
+{ id:'skills',   label:'SKILLS',      color:0x2F6FE4, radius:200, speed:0.065, incline:0.35 },
+{ id:'projects', label:'PROJECTS',    color:0xC98A1A, radius:250, speed:0.05,  incline:-0.2 },
+{ id:'github',   label:'GITHUB',      color:0x9AA8BC, radius:300, speed:0.04,  incline:0.5  },
+{ id:'cp',       label:'CODEFORCES',  color:0x8A44D8, radius:230, speed:0.055, incline:-0.4 },
+{ id:'education',label:'EDUCATION',   color:0x0FA3A3, radius:280, speed:0.045, incline:0.2  },
+{ id:'resume',   label:'RESUME',      color:0xE8ECF3, radius:335, speed:0.032, incline:-0.15},
+{ id:'contact',  label:'CONTACT',     color:0xD6483F, radius:190, speed:0.07,  incline:0.6  }
+];
+
+/* ---------- Quality tiers ---------- */
+let quality = isSmall ? 'low' : (cores <= 4 ? 'medium' : 'high');
+const badge = document.getElementById('quality-badge');
+function setQuality(q){
+quality = q;
+if (badge) badge.textContent = 'quality: ' + q + (q === (isSmall ? 'low' : (cores <= 4 ? 'medium' : 'high')) ? ' (auto)' : '');
+glowSprites.forEach(s => { s.visible = quality !== 'low'; });
+}
+if (badge) badge.textContent = 'quality: ' + quality + ' (auto)';
+
+/* ---------- Scene setup ---------- */
+const canvas = document.getElementById('universe-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: quality !== 'low' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.3 : 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 4000);
+const OVERVIEW_POS = new THREE.Vector3(0, 90, 620);
+const OVERVIEW_LOOK = new THREE.Vector3(0, 0, 0);
+camera.position.copy(OVERVIEW_POS);
+camera.lookAt(OVERVIEW_LOOK);
+
+scene.add(new THREE.AmbientLight(0x6677aa, 0.55));
+const coreLight = new THREE.PointLight(0xffffff, 1.6, 1400, 1.6);
+coreLight.position.set(0, 0, 0);
+scene.add(coreLight);
+
+// Identity core — the same wireframe language as the hero kernel, scaled up.
+const coreGroup = new THREE.Group();
+const coreOuter = new THREE.Mesh(
+new THREE.IcosahedronGeometry(46, 1),
+new THREE.MeshBasicMaterial({ color: 0x12A454, wireframe: true, transparent: true, opacity: 0.6 })
+);
+const coreInner = new THREE.Mesh(
+new THREE.IcosahedronGeometry(28, 0),
+new THREE.MeshStandardMaterial({ color: 0x0B1420, emissive: 0x12A454, emissiveIntensity: 0.5, wireframe: false, roughness: 0.4 })
+);
+coreGroup.add(coreOuter, coreInner);
+scene.add(coreGroup);
+
+function makeGlowTexture(hex){
+const size = 128;
+const cnv = document.createElement('canvas');
+cnv.width = cnv.height = size;
+const ctx = cnv.getContext('2d');
+const c = new THREE.Color(hex);
+const rgb = `${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)}`;
+const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+grad.addColorStop(0, `rgba(${rgb},0.9)`);
+grad.addColorStop(0.4, `rgba(${rgb},0.35)`);
+grad.addColorStop(1, `rgba(${rgb},0)`);
+ctx.fillStyle = grad;
+ctx.fillRect(0, 0, size, size);
+return new THREE.CanvasTexture(cnv);
+}
+
+const planetGroup = new THREE.Group();
+scene.add(planetGroup);
+const glowSprites = [];
+const planetMeshes = [];
+
+SECTIONS.forEach((s) => {
+const orbit = new THREE.Object3D();
+orbit.rotation.z = s.incline;
+orbit.userData.angle = Math.random() * Math.PI * 2;
+planetGroup.add(orbit);
+
+const mesh = new THREE.Mesh(
+new THREE.SphereGeometry(quality === 'low' ? 9 : 11, quality === 'low' ? 12 : 22, quality === 'low' ? 10 : 18),
+new THREE.MeshStandardMaterial({ color: s.color, emissive: s.color, emissiveIntensity: 0.35, roughness: 0.5, metalness: 0.1 })
+);
+mesh.userData.section = s;
+mesh.position.set(s.radius, 0, 0);
+orbit.add(mesh);
+planetMeshes.push(mesh);
+
+const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(s.color), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+glow.scale.set(46, 46, 1);
+mesh.add(glow);
+glowSprites.push(glow);
+
+s.orbit = orbit;
+s.mesh = mesh;
+});
+
+/* ---------- HUD labels (billboarded via 2D projection) ---------- */
+const hud = document.getElementById('universe-hud');
+SECTIONS.forEach((s) => {
+const el = document.createElement('div');
+el.className = 'planet-label';
+el.innerHTML = `<span class="dot" style="background:#${s.color.toString(16).padStart(6,'0')}"></span>${s.label}`;
+el.addEventListener('click', () => enterPlanet(s.id));
+hud.appendChild(el);
+s.labelEl = el;
+});
+
+function updateLabels(){
+const v = new THREE.Vector3();
+SECTIONS.forEach((s) => {
+s.mesh.getWorldPosition(v);
+v.project(camera);
+const inView = v.z < 1 && v.x > -1.15 && v.x < 1.15 && v.y > -1.15 && v.y < 1.15;
+s.labelEl.classList.toggle('visible', inView && !landed);
+if (inView){
+s.labelEl.style.left = ((v.x * 0.5 + 0.5) * window.innerWidth) + 'px';
+s.labelEl.style.top = ((-v.y * 0.5 + 0.5) * window.innerHeight - 26) + 'px';
+}
+});
+}
+
+/* ---------- Raycasting: hover + click/tap ---------- */
+const raycaster = new THREE.Raycaster();
+const pointerNDC = new THREE.Vector2(-10, -10);
+let hovered = null;
+
+function setPointerFromEvent(e, target){
+const rect = canvas.getBoundingClientRect();
+target.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+target.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+}
+
+canvas.addEventListener('mousemove', (e) => {
+if (landed || isTouch) return;
+setPointerFromEvent(e, pointerNDC);
+});
+canvas.addEventListener('click', (e) => {
+if (landed) return;
+setPointerFromEvent(e, pointerNDC);
+raycaster.setFromCamera(pointerNDC, camera);
+const hit = raycaster.intersectObjects(planetMeshes)[0];
+if (hit) enterPlanet(hit.object.userData.section.id);
+});
+canvas.addEventListener('touchend', (e) => {
+if (landed || !e.changedTouches || !e.changedTouches[0]) return;
+setPointerFromEvent(e.changedTouches[0], pointerNDC);
+raycaster.setFromCamera(pointerNDC, camera);
+const hit = raycaster.intersectObjects(planetMeshes)[0];
+if (hit) enterPlanet(hit.object.userData.section.id);
+}, { passive: true });
+
+/* ---------- Touch drag to orbit the overview camera ---------- */
+let dragging = false, lastX = 0, lastY = 0, yaw = 0, pitch = 0.14;
+function onDragStart(x, y){ if (landed) return; dragging = true; lastX = x; lastY = y; }
+function onDragMove(x, y){
+if (!dragging || landed) return;
+yaw += (x - lastX) * 0.004;
+pitch = Math.max(-0.5, Math.min(0.5, pitch + (y - lastY) * 0.003));
+lastX = x; lastY = y;
+}
+function onDragEnd(){ dragging = false; }
+canvas.addEventListener('mousedown', (e) => onDragStart(e.clientX, e.clientY));
+window.addEventListener('mousemove', (e) => onDragMove(e.clientX, e.clientY));
+window.addEventListener('mouseup', onDragEnd);
+canvas.addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) onDragStart(t.clientX, t.clientY); }, { passive: true });
+canvas.addEventListener('touchmove', (e) => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }, { passive: true });
+canvas.addEventListener('touchend', onDragEnd, { passive: true });
+
+/* ---------- WASD free-fly (desktop overview only) ---------- */
+const keys = Object.create(null);
+window.addEventListener('keydown', (e) => {
+const tag = (document.activeElement && document.activeElement.tagName) || '';
+if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+keys[e.key.toLowerCase()] = true;
+});
+window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+/* ---------- Camera flight state machine ---------- */
+let landed = false;
+let flight = null; // { from, to, fromLook, toLook, t0, dur, onDone }
+
+function easeInOutCubic(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+
+function flyTo(pos, look, dur, onDone){
+flight = { from: camera.position.clone(), to: pos.clone(), fromLook: currentLook.clone(), toLook: look.clone(), t0: performance.now(), dur, onDone };
+}
+const currentLook = OVERVIEW_LOOK.clone();
+
+function enterPlanet(id){
+const s = SECTIONS.find(x => x.id === id);
+if (!s) return;
+closeOverlays();
+landed = true;
+document.getElementById('universe-stage').classList.add('landed');
+document.getElementById('return-universe-btn').style.display = 'inline-flex';
+
+const worldPos = new THREE.Vector3();
+s.mesh.getWorldPosition(worldPos);
+const dir = worldPos.clone().normalize();
+const camPos = worldPos.clone().add(dir.multiplyScalar(60)).add(new THREE.Vector3(0, 14, 0));
+flyTo(camPos, worldPos, reduceMotion ? 1 : 1100, () => {
+const target = document.getElementById(id);
+if (target) target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+});
+history.replaceState(null, '', '#' + id);
+}
+
+function returnToUniverse(){
+if (!landed) return;
+landed = false;
+document.getElementById('universe-stage').classList.remove('landed');
+document.getElementById('return-universe-btn').style.display = 'none';
+window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+flyTo(OVERVIEW_POS, OVERVIEW_LOOK, reduceMotion ? 1 : 900);
+history.replaceState(null, '', '#hero');
+}
+window.__universeReturn = returnToUniverse;
+window.__universeEnter = enterPlanet;
+
+document.getElementById('return-universe-btn').addEventListener('click', returnToUniverse);
+
+/* ---------- Command palette ---------- */
+const CMDS = [
+{ id:'about', label:'/about', hint:'Jump to About planet' },
+{ id:'skills', label:'/skills', hint:'Jump to Skills planet' },
+{ id:'projects', label:'/projects', hint:'Jump to Project galaxy' },
+{ id:'github', label:'/github', hint:'Jump to GitHub galaxy' },
+{ id:'cp', label:'/codeforces', hint:'Jump to Codeforces arena' },
+{ id:'education', label:'/education', hint:'Jump to Education timeline' },
+{ id:'resume', label:'/resume', hint:'Jump to Resume' },
+{ id:'contact', label:'/contact', hint:'Jump to Contact portal' },
+{ id:'theme', label:'/theme', hint:'Toggle dark / light' },
+{ id:'terminal', label:'/terminal', hint:'Open developer terminal' },
+{ id:'universe', label:'/universe', hint:'Return to the universe' },
+{ id:'quality-low', label:'/quality low', hint:'Reduce visual effects' },
+{ id:'quality-high', label:'/quality high', hint:'Restore full effects' },
+{ id:'help', label:'/help', hint:'List all commands' }
+];
+const cmdkOverlay = document.getElementById('cmdk-overlay');
+const cmdkInput = document.getElementById('cmdk-input');
+const cmdkList = document.getElementById('cmdk-list');
+let cmdkActive = 0;
+
+function runCommand(cmdId){
+switch(cmdId){
+case 'theme': { const t = document.getElementById('theme-toggle'); if (t) t.click(); break; }
+case 'terminal': openTerminal(); return;
+case 'universe': returnToUniverse(); break;
+case 'quality-low': setQuality('low'); break;
+case 'quality-high': setQuality('high'); break;
+case 'help': openTerminal('help'); return;
+default: enterPlanet(cmdId);
+}
+closeCmdk();
+}
+
+function renderCmdkList(filter){
+const f = (filter || '').toLowerCase().replace(/^\//,'');
+const matches = CMDS.filter(c => !f || c.label.toLowerCase().includes(f) || c.hint.toLowerCase().includes(f));
+cmdkActive = 0;
+cmdkList.innerHTML = matches.map((c, i) => `<div class="cmdk-item${i===0?' active':''}" data-id="${c.id}"><span>${c.label}</span><span class="hint">${c.hint}</span></div>`).join('') || '<div class="cmdk-item">No matching command</div>';
+Array.from(cmdkList.children).forEach(el => {
+el.addEventListener('click', () => { if (el.dataset.id) runCommand(el.dataset.id); });
+});
+}
+function openCmdk(){ cmdkOverlay.classList.add('open'); renderCmdkList(''); cmdkInput.value=''; cmdkInput.focus(); }
+function closeCmdk(){ cmdkOverlay.classList.remove('open'); }
+document.getElementById('cmdk-open-btn').addEventListener('click', openCmdk);
+cmdkInput.addEventListener('input', () => renderCmdkList(cmdkInput.value));
+cmdkInput.addEventListener('keydown', (e) => {
+const items = Array.from(cmdkList.children).filter(el => el.dataset.id);
+if (e.key === 'ArrowDown'){ e.preventDefault(); cmdkActive = Math.min(items.length-1, cmdkActive+1); items.forEach((el,i)=>el.classList.toggle('active', i===cmdkActive)); }
+else if (e.key === 'ArrowUp'){ e.preventDefault(); cmdkActive = Math.max(0, cmdkActive-1); items.forEach((el,i)=>el.classList.toggle('active', i===cmdkActive)); }
+else if (e.key === 'Enter'){ const el = items[cmdkActive]; if (el) runCommand(el.dataset.id); }
+else if (e.key === 'Escape'){ closeCmdk(); }
+});
+cmdkOverlay.addEventListener('mousedown', (e) => { if (e.target === cmdkOverlay) closeCmdk(); });
+
+/* ---------- Terminal (easter egg, real data only) ---------- */
+const termOverlay = document.getElementById('terminal-overlay');
+const termLog = document.getElementById('terminal-log');
+const termInput = document.getElementById('terminal-input');
+function termPrint(text, cls){
+const line = document.createElement('div');
+if (cls) line.className = cls;
+line.textContent = text;
+termLog.appendChild(line);
+termLog.scrollTop = termLog.scrollHeight;
+}
+function textOf(sel){ const el = document.querySelector(sel); return el ? el.textContent.trim().replace(/\s+/g,' ') : ''; }
+function textOfAll(sel){ return Array.from(document.querySelectorAll(sel)).map(el => el.textContent.trim()).filter(Boolean); }
+
+function runTerminalCommand(raw){
+const cmd = raw.trim().toLowerCase();
+termPrint('> ' + raw, 't-cmd');
+switch(cmd){
+case 'help':
+termPrint('help · about · projects · skills · github · cf · resume · contact · clear · universe');
+break;
+case 'about':
+termPrint(textOf('#about .quick-facts') || 'About data unavailable.');
+enterPlanet('about');
+break;
+case 'projects':
+termPrint(textOfAll('#projects .sb-main h4').join(', ') || 'No public projects listed yet.');
+enterPlanet('projects');
+break;
+case 'skills':
+termPrint(textOfAll('.skill-panel.active .pill').join(', ') || 'Switch a skill tab, then rerun.');
+enterPlanet('skills');
+break;
+case 'github':
+termPrint(textOf('#gh-status') || 'Loading GitHub data — try again shortly.');
+enterPlanet('github');
+break;
+case 'cf':
+termPrint(`rating: ${textOf('#cf-current-rating')} · max: ${textOf('#cf-max-rating')} · rank: ${textOf('#cf-rank')} · solved: ${textOf('#cf-solved')}`);
+enterPlanet('cp');
+break;
+case 'resume':
+termPrint('Opening resume — download link is in the panel.');
+enterPlanet('resume');
+break;
+case 'contact':
+termPrint(textOf('#contact .contact-info-item .val') || 'See the contact portal for real links.');
+enterPlanet('contact');
+break;
+case 'universe':
+returnToUniverse();
+break;
+case 'clear':
+termLog.innerHTML = '';
+break;
+case '':
+break;
+default:
+termPrint(`command not found: ${cmd} — type "help"`, 't-err');
+}
+}
+function openTerminal(prefill){
+termOverlay.classList.add('open');
+termInput.value = '';
+termInput.focus();
+if (!termLog.dataset.greeted){
+termPrint('Developer terminal — type "help" to list commands.');
+termLog.dataset.greeted = '1';
+}
+if (prefill) runTerminalCommand(prefill);
+}
+function closeTerminal(){ termOverlay.classList.remove('open'); }
+document.getElementById('terminal-open-btn').addEventListener('click', () => openTerminal());
+termInput.addEventListener('keydown', (e) => {
+if (e.key === 'Enter' && termInput.value.trim() !== ''){ runTerminalCommand(termInput.value); termInput.value=''; }
+else if (e.key === 'Escape'){ closeTerminal(); }
+});
+termOverlay.addEventListener('mousedown', (e) => { if (e.target === termOverlay) closeTerminal(); });
+
+function closeOverlays(){ closeCmdk(); closeTerminal(); }
+
+/* ---------- Global keyboard: Ctrl/Cmd+K, Esc, backtick easter egg ---------- */
+window.addEventListener('keydown', (e) => {
+const tag = (document.activeElement && document.activeElement.tagName) || '';
+const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); cmdkOverlay.classList.contains('open') ? closeCmdk() : openCmdk(); return; }
+if (e.key === '`' && !typing){ e.preventDefault(); termOverlay.classList.contains('open') ? closeTerminal() : openTerminal(); return; }
+if (e.key === 'Escape'){
+if (cmdkOverlay.classList.contains('open')){ closeCmdk(); return; }
+if (termOverlay.classList.contains('open')){ closeTerminal(); return; }
+if (landed){ returnToUniverse(); return; }
+}
+});
+
+/* ---------- Konami code easter egg → secret constellation pulse ---------- */
+(function konami(){
+const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let pos = 0;
+window.addEventListener('keydown', (e) => {
+pos = (e.key === seq[pos]) ? pos + 1 : 0;
+if (pos === seq.length){
+pos = 0;
+planetMeshes.forEach((m, i) => setTimeout(() => {
+m.material.emissiveIntensity = 1.6;
+setTimeout(() => { m.material.emissiveIntensity = 0.35; }, 400);
+}, i * 90));
+}
+});
+})();
+
+/* ---------- Resize ---------- */
+let resizeTimer;
+window.addEventListener('resize', () => {
+clearTimeout(resizeTimer);
+resizeTimer = setTimeout(() => {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+}, 150);
+});
+
+/* ---------- Render loop ---------- */
+let running = true;
+document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+function animate(now){
+if (running){
+coreGroup.rotation.y += 0.0016;
+coreGroup.rotation.x += 0.0006;
+
+SECTIONS.forEach(s => { s.orbit.userData.angle += s.speed * 0.01; s.orbit.rotation.y = s.orbit.userData.angle; });
+
+if (flight){
+const t = Math.min(1, (now - flight.t0) / flight.dur);
+const e = easeInOutCubic(t);
+camera.position.lerpVectors(flight.from, flight.to, e);
+currentLook.lerpVectors(flight.fromLook, flight.toLook, e);
+camera.lookAt(currentLook);
+if (t >= 1){ const done = flight.onDone; flight = null; if (done) done(); }
+} else if (!landed){
+// Manual drag/orbit takes precedence over the resting position once the
+// user has touched the universe at all (yaw/pitch stay nonzero after release).
+if (dragging || yaw !== 0 || pitch !== 0.14){
+const dist = OVERVIEW_POS.length();
+camera.position.x = Math.sin(yaw) * dist;
+camera.position.z = Math.cos(yaw) * dist;
+camera.position.y = OVERVIEW_POS.y + pitch * 200;
+}
+if (!isTouch){
+const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
+const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
+const speed = 2.2;
+if (keys['w']) camera.position.addScaledVector(fwd, speed);
+if (keys['s']) camera.position.addScaledVector(fwd, -speed);
+if (keys['a']) camera.position.addScaledVector(right, -speed);
+if (keys['d']) camera.position.addScaledVector(right, speed);
+}
+camera.lookAt(currentLook.set(0, 0, 0));
+}
+
+updateLabels();
+renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+/* ---------- Loading / intro sequence ---------- */
+(function loadingSequence(){
+const overlay = document.getElementById('universe-loading');
+const fill = document.getElementById('ul-bar-fill');
+const steps = ['ul-step-scene','ul-step-planets','ul-step-field','ul-step-data'].map(id => document.getElementById(id));
+const enterBtn = document.getElementById('enter-universe-btn');
+const skipBtn = document.getElementById('skip-universe-btn');
+const seen = (() => { try { return localStorage.getItem('universe_intro_seen') === '1'; } catch(e){ return false; } })();
+
+function markSeen(){ try { localStorage.setItem('universe_intro_seen', '1'); } catch(e){} }
+
+if (seen || reduceMotion){
+overlay.classList.add('hidden');
+markSeen();
+return;
+}
+
+let pct = 0;
+let stepIdx = 0;
+function tick(){
+pct = Math.min(100, pct + 4 + Math.random() * 6);
+fill.style.width = pct + '%';
+if (pct > (stepIdx + 1) * 25 && stepIdx < steps.length){
+steps[stepIdx].classList.add('done');
+steps[stepIdx].querySelector('span:last-child').textContent = 'ready';
+stepIdx++;
+}
+if (pct < 100){ setTimeout(tick, 180); }
+else { overlay.classList.add('ready'); }
+}
+tick();
+
+enterBtn.addEventListener('click', () => { overlay.classList.add('hidden'); markSeen(); });
+skipBtn.addEventListener('click', () => { markSeen(); enterClassicMode(); });
+})();
+
 })();
 </script>
 </body>
