@@ -19,6 +19,46 @@
 <meta name="twitter:title" content="MD. Yeasin Arafat — CSE Student & Software Developer" />
 <meta name="twitter:description" content="CSE student at HSTU, Android/web developer and competitive programmer, presented as an online-judge submission log." />
 <meta name="twitter:image" content="https://yea5inarafat.vercel.app/profile-photo.jpg" />
+<!-- Structured data — Person schema built only from verified profile facts
+     (name, university, department, verified profile URLs, contact). No
+     invented job titles, employers or credentials. -->
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "Person",
+"name": "MD. Yeasin Arafat",
+"alternateName": "Yea5inArafat",
+"url": "https://yea5inarafat.vercel.app/",
+"image": "https://yea5inarafat.vercel.app/profile-photo.jpg",
+"jobTitle": "Computer Science & Engineering Student",
+"description": "CSE undergraduate at HSTU, Bangladesh — software developer and competitive programmer.",
+"email": "mailto:yea5inar4fat@gmail.com",
+"telephone": "+8801717082040",
+"address": {
+"@type": "PostalAddress",
+"addressLocality": "Dinajpur",
+"addressCountry": "BD"
+},
+"affiliation": {
+"@type": "CollegeOrUniversity",
+"name": "Hajee Mohammad Danesh Science & Technology University (HSTU)"
+},
+"alumniOf": {
+"@type": "CollegeOrUniversity",
+"name": "Hajee Mohammad Danesh Science & Technology University (HSTU)"
+},
+"sameAs": [
+"https://github.com/Yea5inArafat",
+"https://codeforces.com/profile/Yea5inArafat",
+"https://codeforces.com/profile/Arafat02",
+"https://leetcode.com/u/Yea5inArafat/",
+"https://atcoder.jp/users/Yea5inArafat",
+"https://profiles.topcoder.com/yea5inarafat",
+"https://www.facebook.com/Yea5inArafat/",
+"https://www.instagram.com/yea5inarafat/"
+]
+}
+</script>
 <script>
 (function(){
 try {
@@ -374,6 +414,128 @@ border-bottom:1px solid var(--border); align-items:center;
 .tl-item .tl-desc{color:var(--ink-muted); font-size:14px;}
 .tag-row{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
 .tag{font-family:var(--font-mono); font-size:11px; padding:4px 9px; border-radius:5px; background:var(--surface-2); border:1px solid var(--border); color:var(--ink-muted);}
+
+/* ---------------- Education / academic achievements table ----------------
+   Rows are hardcoded static HTML (see #edu-table-body in the education
+   section) rather than JS-rendered, so the content is present in the raw
+   markup for no-JS users and crawlers. The CSS below is presentation
+   only — nothing here encodes any academic figures. */
+.edu-table-wrap{
+border-radius:16px; overflow:hidden; background:var(--glass);
+backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+border:1px solid var(--border); box-shadow:0 24px 60px -34px rgba(0,0,0,.35);
+}
+.edu-table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+.edu-table{width:100%; border-collapse:collapse; min-width:640px;}
+.edu-table thead th{
+font-family:var(--font-mono); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+color:var(--ink-dim); text-align:left; padding:16px 20px; background:var(--surface-2);
+border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.edu-table tbody td{
+padding:18px 20px; font-size:14px; color:var(--ink); border-bottom:1px solid var(--border);
+vertical-align:middle;
+}
+.edu-table tbody tr{transition:background-color .2s ease;}
+.edu-table tbody tr:last-child td{border-bottom:none;}
+.edu-table tbody tr:hover{background:var(--surface-2);}
+.edu-q-cell{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:14px; white-space:nowrap;}
+.edu-q-icon{font-size:16px; flex-shrink:0;}
+.edu-table td.edu-td-year{font-family:var(--font-mono); color:var(--ink-muted); white-space:nowrap;}
+.edu-table td.edu-td-gpa{font-family:var(--font-mono); font-weight:700; color:var(--ac); white-space:nowrap;}
+.edu-td-gpa.na{color:var(--ink-dim); font-weight:600;}
+/* Achievement/Status column — the one column the brief asks to visually
+   highlight, via a pill badge rather than plain text. */
+.edu-status{
+display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11.5px; font-weight:700;
+padding:5px 12px; border-radius:999px; white-space:nowrap;
+}
+.edu-status.scholarship{color:var(--ac); background:var(--ac-soft); border:1px solid var(--ac);}
+.edu-status.completed{color:var(--ink-muted); background:var(--surface-2); border:1px solid var(--border);}
+.edu-status.ongoing{color:var(--pending); background:var(--pending-soft); border:1px solid var(--pending);}
+.edu-status.ongoing .live-dot{width:6px; height:6px; border-radius:50%; background:var(--pending); animation:pulse 1.8s ease-in-out infinite;}
+.edu-bsc-meta{display:block; margin-top:6px; font-family:var(--font-mono); font-size:11px; color:var(--ink-dim);}
+/* Current-stage emphasis (B.Sc., ongoing) — an accent left-rail + soft
+   tint, reusing the site's existing accent language rather than a new one. */
+.edu-row-current{background:var(--ac-soft); position:relative;}
+.edu-row-current td{position:relative;}
+.edu-row-current td:first-child::before{
+content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--ac);
+}
+.edu-row-current:hover{background:var(--ac-soft);}
+@media (prefers-reduced-motion: reduce){
+.edu-status.ongoing .live-dot{animation:none;}
+}
+/* Mobile: each row becomes a self-contained card (data-label driven), so
+   the table never forces horizontal page scroll on narrow screens. */
+@media (max-width:700px){
+.edu-table{min-width:0;}
+.edu-table thead{display:none;}
+.edu-table, .edu-table tbody, .edu-table tr{display:block; width:100%;}
+.edu-table tbody tr{
+margin:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface);
+}
+.edu-row-current{margin:14px; border-color:var(--ac);}
+.edu-row-current td:first-child::before{display:none;}
+.edu-table td{
+display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+padding:12px 16px; border-bottom:1px dashed var(--border); text-align:right;
+}
+.edu-table td:last-child{border-bottom:none;}
+.edu-table td::before{
+content:attr(data-label); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;
+letter-spacing:.05em; color:var(--ink-dim); text-align:left; flex-shrink:0; padding-top:1px;
+}
+.edu-q-cell{justify-content:flex-end;}
+.edu-bsc-meta{text-align:right;}
+}
+
+/* ---------------- Academic highlights (GPA / scholarship badges) ---------------- */
+.edu-highlight{
+margin-bottom:26px; padding:22px 26px; border-radius:14px;
+background:var(--glass); backdrop-filter:blur(12px) saturate(140%); -webkit-backdrop-filter:blur(12px) saturate(140%);
+border:1px solid var(--border); display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+}
+.edu-highlight-h{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em; flex:0 0 auto;}
+.edu-highlight-badges{display:flex; gap:12px; flex-wrap:wrap; flex:0 0 auto;}
+.edu-badge{
+display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px;
+background:var(--surface); border:1px solid var(--border); font-family:var(--font-mono); font-size:12.5px; color:var(--ink);
+}
+.edu-badge .medal{font-size:15px;}
+.edu-badge b{color:var(--ac); font-weight:800;}
+.edu-highlight-journey{
+flex:1 1 260px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);
+white-space:nowrap; overflow-x:auto; padding-bottom:2px;
+}
+@media (max-width:760px){
+.edu-highlight{flex-direction:column; align-items:flex-start; gap:14px;}
+.edu-highlight-journey{white-space:normal;}
+}
+
+/* ---------------- Competitive-programming coding-profile cards ---------------- */
+.platform-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+.platform-card{
+background:var(--glass); backdrop-filter:blur(12px) saturate(140%); -webkit-backdrop-filter:blur(12px) saturate(140%);
+border:1px solid var(--border); border-radius:14px; padding:22px 20px; text-align:center;
+display:flex; flex-direction:column; align-items:center; gap:8px;
+transition:transform .3s cubic-bezier(.16,.8,.24,1), border-color .25s ease, box-shadow .3s ease;
+}
+.platform-card:hover{transform:translateY(-3px); border-color:var(--ac); box-shadow:0 20px 40px -24px var(--glow-ac);}
+.platform-logo{
+width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+font-family:var(--font-mono); font-weight:800; font-size:15px; color:#fff; margin-bottom:4px;
+}
+.platform-name{font-size:15px; font-weight:700; font-family:var(--font-display);}
+.platform-user{font-family:var(--font-mono); font-size:12.5px; color:var(--ac);}
+.platform-cat{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;}
+.platform-card .btn{margin-top:4px; width:100%; justify-content:center;}
+@media (max-width:900px){
+.platform-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:480px){
+.platform-grid{grid-template-columns:1fr;}
+}
 .resume-box{
 text-align:center; padding:56px 24px; border-radius:16px;
 background:var(--glass); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border);
@@ -531,9 +693,63 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 .gh-repo-card .gh-desc{color:var(--ink-muted); font-size:13px;}
 .gh-repo-meta{display:flex; gap:14px; flex-wrap:wrap; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim);}
 .gh-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px; margin-top:24px;}
+.gh-live-btn{border-color:var(--ac); color:var(--ac);}
+.gh-live-btn:hover{background:var(--ac-soft);}
 .cf-chart-wrap{margin-top:20px; padding:18px; background:var(--glass); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px;}
 .cf-chart-wrap svg{width:100%; height:120px; display:block;}
 .cf-chart-label{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); margin-bottom:10px; text-transform:uppercase; letter-spacing:.05em;}
+
+/* ---------------- Codeforces "Tags Solved" analytics ---------------- */
+.cf-tags-card{
+margin-top:22px; padding:26px; border-radius:14px; position:relative;
+background:var(--glass); backdrop-filter:blur(12px) saturate(140%); -webkit-backdrop-filter:blur(12px) saturate(140%);
+border:1px solid var(--border);
+}
+.cf-tags-head h4{font-family:var(--font-mono); font-size:15px; margin-bottom:6px;}
+.cf-tags-head p{color:var(--ink-muted); font-size:13px; max-width:640px;}
+.cf-tags-head code{font-family:var(--font-mono); font-size:12px; color:var(--ac); background:var(--ac-soft); padding:1px 5px; border-radius:4px;}
+.cf-tags-summary{margin-top:14px;}
+.cf-tags-stats-row{display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--font-mono); font-size:12px; color:var(--ink-muted);}
+.cf-tags-stats-row b{color:var(--ink); font-size:15px; display:block; font-weight:800;}
+.cf-tags-body{
+margin-top:20px; display:grid; grid-template-columns:220px 1fr; gap:32px; align-items:center;
+}
+.cf-tags-chart-wrap{position:relative; width:220px; height:220px; margin:0 auto;}
+.cf-tags-chart-wrap svg{width:100%; height:100%; overflow:visible;}
+.cf-tags-chart-wrap path{ transition:opacity .15s ease, transform .15s ease; transform-origin:110px 110px; cursor:pointer; }
+.cf-tags-chart-wrap path:hover, .cf-tags-chart-wrap path.hover{ opacity:.85; transform:scale(1.035); }
+.cf-tags-center{
+position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none;
+}
+.cf-tags-center .v{font-family:var(--font-mono); font-size:26px; font-weight:800; color:var(--ink);}
+.cf-tags-center .k{font-family:var(--font-mono); font-size:10px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em;}
+.cf-tags-legend{
+list-style:none; display:flex; flex-direction:column; gap:2px; max-height:260px; overflow-y:auto; padding-right:6px;
+}
+.cf-tags-legend li{
+display:flex; align-items:center; gap:10px; padding:7px 4px; border-bottom:1px dashed var(--border);
+font-family:var(--font-mono); font-size:12.5px; color:var(--ink-muted); cursor:default;
+transition:background .15s ease, color .15s ease;
+}
+.cf-tags-legend li:hover, .cf-tags-legend li.hover{ background:var(--surface-2); color:var(--ink); }
+.cf-tags-legend .sw{width:10px; height:10px; border-radius:3px; flex:0 0 auto;}
+.cf-tags-legend .nm{flex:1 1 auto; text-transform:capitalize;}
+.cf-tags-legend .ct{color:var(--ink); font-weight:700;}
+.cf-tags-legend .pc{color:var(--ink-dim); font-size:11px; width:44px; text-align:right;}
+.cf-tags-tooltip{
+position:fixed; z-index:1100; pointer-events:none; opacity:0; transform:translateY(4px);
+transition:opacity .12s ease, transform .12s ease;
+background:var(--ink); color:var(--paper); font-family:var(--font-mono); font-size:11.5px;
+padding:8px 11px; border-radius:8px; white-space:nowrap; box-shadow:0 12px 24px -10px rgba(0,0,0,.5);
+}
+.cf-tags-tooltip.show{opacity:1; transform:translateY(0);}
+.cf-tags-tooltip b{display:block; font-size:12.5px; margin-bottom:2px; text-transform:capitalize;}
+.cf-tags-error{margin-top:14px; font-family:var(--font-mono); font-size:12px; color:var(--ink-dim);}
+@media (max-width:760px){
+.cf-tags-body{grid-template-columns:1fr; gap:22px;}
+.cf-tags-legend{max-height:none; overflow-y:visible; overflow-x:auto; flex-direction:row; gap:0;}
+.cf-tags-legend li{flex:0 0 auto; min-width:150px; border-bottom:none; border-right:1px dashed var(--border);}
+}
 @media (max-width:640px){
 .planet-label{font-size:10px; padding:5px 10px;}
 #universe-topbar{display:none;}
@@ -565,12 +781,20 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
    ===================================================================== */
 #solar-nav{
 position:fixed; top:68px; left:0; right:0; z-index:890;
-height:66px; display:flex; align-items:stretch;
+height:66px;
 background:rgba(238,241,245,.86); backdrop-filter:blur(10px) saturate(140%); -webkit-backdrop-filter:blur(10px) saturate(140%);
 border-bottom:1px solid var(--border);
 }
 html[data-theme="dark"] #solar-nav{ background:rgba(11,17,28,.86); }
 #solar-nav-spacer{ height:66px; }
+/* Full-bleed bar (#solar-nav spans edge-to-edge), but the row of controls
+   inside is centered and width-capped so planets don't stretch into an
+   absurd, hard-to-scan spread on ultra-wide monitors. Below that cap the
+   inner row simply fills 100% of the fixed bar's width. */
+#solar-nav-inner{
+height:100%; max-width:1760px; margin:0 auto;
+display:flex; align-items:stretch;
+}
 #solar-nav-fixed{
 flex:0 0 auto; display:flex; align-items:center; gap:6px;
 padding:0 14px; position:relative; z-index:3; background:inherit;
@@ -578,16 +802,11 @@ padding:0 14px; position:relative; z-index:3; background:inherit;
 #solar-nav-fixed::after{
 content:""; position:absolute; top:10px; bottom:10px; right:0; width:1px; background:var(--border);
 }
-/* Desktop cleanup: these two buttons are icon-only duplicates of the
-   floating universe-topbar pair above (both just proxy to the same
-   Ctrl/Cmd+K / backtick-driven overlays), and together with that pill
-   they read as a cluttered, redundant nav on desktop. Hidden here only;
-   tablet/mobile keep this zone since it's the sole click target for
-   Search/Terminal once the floating pill and/or keyboard aren't the
-   most natural interaction (touch devices, no physical Ctrl+K/` combo). */
-@media (min-width:901px){
-#solar-nav-fixed{ display:none; }
-}
+/* Desktop: Search + Terminal stay visible here (this is now the single
+   on-screen affordance for both on every breakpoint, desktop included —
+   the floating #universe-topbar pill stays hidden on desktop above so
+   there's no duplicate/colliding control, but keyboard users still have
+   Ctrl/Cmd+K and ` as shortcuts regardless). */
 .solar-ctrl-btn{
 display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
 font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);
@@ -606,6 +825,14 @@ scroll-snap-type:x proximity; scroll-behavior:smooth;
 #solar-nav-track.dragging{ cursor:grabbing; scroll-behavior:auto; scroll-snap-type:none; }
 #solar-nav-track::-webkit-scrollbar{height:4px;}
 #solar-nav-track::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+/* Desktop: let the planets spread across the full remaining width of the
+   bar instead of packing to the left with empty space trailing off to
+   the right. justify-content still degrades gracefully to a scrollable
+   row if a "desktop" viewport is narrow enough that 9 planets + labels
+   genuinely don't fit (overflow-x stays auto, nothing clips). */
+@media (min-width:901px){
+#solar-nav-track{ justify-content:space-evenly; gap:12px; }
+}
 .solar-planet{
 flex:0 0 auto; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
 padding:6px 4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.02em; color:var(--ink-dim);
@@ -648,6 +875,8 @@ animation:solarPlanetBob 5.5s ease-in-out infinite;
 .solar-planet:nth-child(6) .solar-emoji{ animation-delay:-3.0s; }
 .solar-planet:nth-child(7) .solar-emoji{ animation-delay:-3.6s; }
 .solar-planet:nth-child(8) .solar-emoji{ animation-delay:-4.2s; }
+.solar-planet:nth-child(9) .solar-emoji{ animation-delay:-4.8s; }
+.solar-planet:nth-child(10) .solar-emoji{ animation-delay:-5.4s; }
 @keyframes solarRingSpin{ from{ transform:rotateX(58deg) rotate(0deg); } to{ transform:rotateX(58deg) rotate(360deg); } }
 @keyframes solarPlanetBob{ 0%,100%{ transform:translateZ(8px) translateY(0); } 50%{ transform:translateZ(8px) translateY(-2.5px); } }
 .solar-text{ transition:color .2s ease; }
@@ -685,6 +914,8 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 .solar-planet:nth-child(6){ --solar-wave: 8px; }
 .solar-planet:nth-child(7){ --solar-wave: 4px; }
 .solar-planet:nth-child(8){ --solar-wave: -2px; }
+.solar-planet:nth-child(9){ --solar-wave: 6px; }
+.solar-planet:nth-child(10){ --solar-wave: -3px; }
 }
 @media (max-width:640px){
 #solar-nav{ top:68px; height:66px; }
@@ -705,6 +936,8 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 .solar-planet:nth-child(6){ --solar-wave: 8px; }
 .solar-planet:nth-child(7){ --solar-wave: 4px; }
 .solar-planet:nth-child(8){ --solar-wave: -2px; }
+.solar-planet:nth-child(9){ --solar-wave: 6px; }
+.solar-planet:nth-child(10){ --solar-wave: -3px; }
 }
 @media (max-width:380px){
 /* Smallest phones (e.g. 320–375px): a touch tighter so the row still
@@ -761,7 +994,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <!-- Command palette -->
 <div id="cmdk-overlay" role="dialog" aria-modal="true" aria-label="Command palette">
 <div id="cmdk-box">
-<input id="cmdk-input" type="text" placeholder="Type a command… (about, projects, skills, github, codeforces, education, resume, contact, theme, terminal)" autocomplete="off" />
+<input id="cmdk-input" type="text" placeholder="Type a command… (about, projects, skills, github, codeforces, profiles, education, resume, contact, theme, terminal)" autocomplete="off" />
 <div id="cmdk-list"></div>
 </div>
 </div>
@@ -780,6 +1013,8 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <li><a href="#projects">Projects</a></li>
 <li><a href="#skills">Skills</a></li>
 <li><a href="#cp">Competitive Programming</a></li>
+<li><a href="#coding-profiles">Coding Profiles</a></li>
+<li><a href="#education">Education</a></li>
 <li><a href="#about">About</a></li>
 <li><a href="#github">GitHub</a></li>
 <li><a href="#resume">Resume</a></li>
@@ -799,6 +1034,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
      horizontal-scrolling row of "planets" mapped to existing section ids.
      Does not replace or alter #navbar / .nav-links above. -->
 <nav id="solar-nav" aria-label="Solar system section navigator">
+<div id="solar-nav-inner">
 <div id="solar-nav-fixed">
 <button type="button" id="solar-search-btn" class="solar-ctrl-btn" title="Command palette (Ctrl+K)" aria-label="Open search / command palette">
 <span aria-hidden="true">⌕</span><span class="solar-ctrl-label">Search</span>
@@ -808,11 +1044,11 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 </button>
 </div>
 <!-- Planet order below matches the ACTUAL <section id="..."> order in this
-     file top-to-bottom: hero, about, skills, projects, github, cp, log
-     (education anchor), contact — i.e. the same set/order as the sibling
-     #navbar .nav-links list, plus Home first. This list is the single
-     source of truth the active-state JS reads from; nothing else
-     hardcodes an order. -->
+     file top-to-bottom: hero, about, skills, projects, github, cp,
+     coding-profiles, education, resume, contact — i.e. the same set/
+     order as the sibling #navbar .nav-links list, plus Home first. This
+     list is the single source of truth the active-state JS reads from;
+     nothing else hardcodes an order. -->
 <div id="solar-nav-track" role="list">
 <a href="#hero" class="solar-planet" role="listitem" aria-label="Home">
 <span class="solar-orbit-ring" aria-hidden="true"></span>
@@ -844,6 +1080,11 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <span class="solar-emoji" aria-hidden="true">⭐</span>
 <span class="solar-text">CP</span>
 </a>
+<a href="#coding-profiles" class="solar-planet" role="listitem" aria-label="Coding profiles">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">💻</span>
+<span class="solar-text">Profiles</span>
+</a>
 <a href="#education" class="solar-planet" role="listitem" aria-label="Education">
 <span class="solar-orbit-ring" aria-hidden="true"></span>
 <span class="solar-emoji" aria-hidden="true">🌙</span>
@@ -860,6 +1101,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <span class="solar-text">Contact</span>
 </a>
 </div>
+</div>
 </nav>
 <div id="solar-nav-spacer" aria-hidden="true"></div>
 
@@ -868,6 +1110,8 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <a href="#projects">Projects</a>
 <a href="#skills">Skills</a>
 <a href="#cp">Competitive Programming</a>
+<a href="#coding-profiles">Coding Profiles</a>
+<a href="#education">Education</a>
 <a href="#about">About</a>
 <a href="#github">GitHub</a>
 <a href="#resume">Resume</a>
@@ -1088,7 +1332,7 @@ toward Codeforces Expert.
 <h2 class="section-title">GitHub, live</h2>
 <p class="section-sub">Pulled directly from the GitHub API for <a href="https://github.com/Yea5inArafat" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ac); font-weight:600;">github.com/Yea5inArafat ↗</a> — nothing here is invented; if the API is unavailable this section says so.</p>
 </div>
-<div id="gh-status" class="skel" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim); min-width:160px;">Loading repositories…</div>
+<div id="gh-status" class="skel" role="status" aria-live="polite" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim); min-width:160px;">Loading repositories…</div>
 <div class="gh-grid" id="gh-grid"></div>
 </div>
 </section>
@@ -1132,6 +1376,156 @@ toward Codeforces Expert.
 <div class="cp-goal-row"><span>More contests</span><span class="tag" style="color:var(--pending); border-color:var(--pending);">in progress</span></div>
 </div>
 </div>
+<!-- Codeforces "Tags Solved" analytics — built entirely from live
+     user.status data for both handles (Yea5inArafat + Arafat02), no
+     hardcoded numbers. See cfTagsAnalytics() below for the fetch/aggregate
+     logic; this block is markup + presentation only. -->
+<div class="cf-tags-card" id="cf-tags-card">
+<div class="cf-tags-head">
+<h4>Tags solved</h4>
+<p>Unique accepted problems by Codeforces tag, across both handles — computed live from <code>user.status</code>, deduplicated by problem.</p>
+</div>
+<div class="cf-tags-summary" id="cf-tags-summary" aria-live="polite">
+<div class="cf-tags-loading" id="cf-tags-loading">
+<span class="skel" style="width:100%;height:14px;display:block;margin-bottom:8px;">Loading tag analytics…</span>
+<span class="skel" style="width:70%;height:14px;display:block;">Loading…</span>
+</div>
+</div>
+<div class="cf-tags-body" id="cf-tags-body" style="display:none;">
+<div class="cf-tags-chart-wrap">
+<svg id="cf-tags-donut" viewBox="0 0 220 220" role="img" aria-label="Donut chart of solved problems by tag"></svg>
+<div class="cf-tags-center" id="cf-tags-center">
+<div class="v" id="cf-tags-total-unique">—</div>
+<div class="k">solved</div>
+</div>
+</div>
+<ul class="cf-tags-legend" id="cf-tags-legend"></ul>
+</div>
+<div class="cf-tags-tooltip" id="cf-tags-tooltip" role="tooltip" aria-hidden="true"></div>
+<p class="cf-tags-error" id="cf-tags-error" style="display:none;">Codeforces tag analytics unavailable right now. <button type="button" class="btn btn-ghost btn-sm" id="cf-tags-retry">Retry</button></p>
+</div>
+</div>
+</section>
+
+<!-- Coding Profiles — id="coding-profiles". Sits right next to Codeforces
+     (#cp) since it's the same "competitive programming" story, just the
+     other judges. No ratings/solved-counts are shown for LeetCode/AtCoder/
+     Topcoder — only the verified handle + a link to the real profile —
+     because only Codeforces has a live API integration on this site. -->
+<section id="coding-profiles">
+<div class="container">
+<div class="section-head">
+<div class="case-label"><span class="id">case_004c</span> / judges.list</div>
+<h2 class="section-title">Competitive programming & coding profiles</h2>
+<p class="section-sub">Handles across every online judge I actively use — Codeforces stats are live above; the rest link straight to the real profile.</p>
+</div>
+<div class="platform-grid">
+<a class="platform-card" href="https://codeforces.com/profile/Yea5inArafat" target="_blank" rel="noopener noreferrer">
+<div class="platform-logo" style="background:#1F8ACB;">CF</div>
+<div class="platform-cat">Competitive coding</div>
+<div class="platform-name">Codeforces</div>
+<div class="platform-user">@Yea5inArafat</div>
+<span class="btn btn-ghost btn-sm">View Profile ↗</span>
+</a>
+<a class="platform-card" href="https://leetcode.com/u/Yea5inArafat/" target="_blank" rel="noopener noreferrer">
+<div class="platform-logo" style="background:#FFA116;">LC</div>
+<div class="platform-cat">DSA practice</div>
+<div class="platform-name">LeetCode</div>
+<div class="platform-user">@Yea5inArafat</div>
+<span class="btn btn-ghost btn-sm">View Profile ↗</span>
+</a>
+<a class="platform-card" href="https://atcoder.jp/users/Yea5inArafat" target="_blank" rel="noopener noreferrer">
+<div class="platform-logo" style="background:#222222;">AC</div>
+<div class="platform-cat">Competitive coding</div>
+<div class="platform-name">AtCoder</div>
+<div class="platform-user">@Yea5inArafat</div>
+<span class="btn btn-ghost btn-sm">View Profile ↗</span>
+</a>
+<a class="platform-card" href="https://profiles.topcoder.com/yea5inarafat" target="_blank" rel="noopener noreferrer">
+<div class="platform-logo" style="background:#2C68D9;">TC</div>
+<div class="platform-cat">Competitive coding</div>
+<div class="platform-name">Topcoder</div>
+<div class="platform-user">@yea5inarafat</div>
+<span class="btn btn-ghost btn-sm">View Profile ↗</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- Dedicated Education section — id="education" lives here now (moved
+     from the small log entry below), so the solar-nav planet, the
+     command palette's /education, and the terminal's education command
+     all keep working unchanged since they resolve by id, not position.
+     Rendered as a responsive table (cards on mobile) with all 5 rows
+     hardcoded as static HTML below: only verified fields from the CV/
+     provided records are used, nothing is invented. The B.Sc. row
+     (ongoing) deliberately has no final GPA — see the "⏳ Ongoing"
+     status badge and "Final Result: Not yet available" note instead. -->
+<section id="education">
+<div class="container">
+<div class="section-head">
+<div class="case-label"><span class="id">case_004b</span> / academic.log</div>
+<h2 class="section-title">Education & academic journey</h2>
+<p class="section-sub">Verified academic milestones, laid out as a mission trajectory.</p>
+</div>
+<!-- Academic highlights strip: purely a summary of the 5 rows in the
+     table below (4 GPA 5.00 results, 3 Talentpool Scholarships —
+     PSC/JSC/SSC only, never HSC or the ongoing B.Sc.). Static markup,
+     no invented figures. -->
+<div class="edu-highlight">
+<div class="edu-highlight-h">🏆 Academic Highlights</div>
+<div class="edu-highlight-badges">
+<div class="edu-badge"><span class="medal">🥇</span><b>4×</b> GPA 5.00</div>
+<div class="edu-badge"><span class="medal">🎖️</span><b>3×</b> Talentpool Scholarship Recipient</div>
+</div>
+<div class="edu-highlight-journey">PSC 2014 → JSC 2017 → SSC 2020 → HSC 2022 → B.Sc. CSE — Ongoing (2nd Year, 2nd Semester · Final Result: Not yet available)</div>
+</div>
+<div class="edu-table-wrap">
+<div class="edu-table-scroll">
+<table class="edu-table" id="edu-table" aria-label="Academic qualifications and achievements">
+<thead>
+<tr><th scope="col">Qualification</th><th scope="col">Year</th><th scope="col">Institution</th><th scope="col">GPA</th><th scope="col">Achievement / Status</th></tr>
+</thead>
+<tbody id="edu-table-body">
+<tr>
+<td data-label="Qualification"><span class="edu-q-cell"><span class="edu-q-icon" aria-hidden="true">🌟</span><span class="edu-q-name">PSC</span></span></td>
+<td class="edu-td-year" data-label="Year">2014</td>
+<td data-label="Institution">Nur Biddya Niketon, Dimla, Nilphamari</td>
+<td class="edu-td-gpa" data-label="GPA">5.00</td>
+<td data-label="Achievement / Status"><span class="edu-status scholarship">🏆 Talentpool Scholarship</span></td>
+</tr>
+<tr>
+<td data-label="Qualification"><span class="edu-q-cell"><span class="edu-q-icon" aria-hidden="true">📚</span><span class="edu-q-name">JSC</span></span></td>
+<td class="edu-td-year" data-label="Year">2017</td>
+<td data-label="Institution">Nur Biddya Niketon, Dimla, Nilphamari</td>
+<td class="edu-td-gpa" data-label="GPA">5.00</td>
+<td data-label="Achievement / Status"><span class="edu-status scholarship">🏆 Talentpool Scholarship</span></td>
+</tr>
+<tr>
+<td data-label="Qualification"><span class="edu-q-cell"><span class="edu-q-icon" aria-hidden="true">🏅</span><span class="edu-q-name">SSC</span></span></td>
+<td class="edu-td-year" data-label="Year">2020</td>
+<td data-label="Institution">Adabari High School, Dimla, Nilphamari</td>
+<td class="edu-td-gpa" data-label="GPA">5.00</td>
+<td data-label="Achievement / Status"><span class="edu-status scholarship">🏆 Talentpool Scholarship</span></td>
+</tr>
+<tr>
+<td data-label="Qualification"><span class="edu-q-cell"><span class="edu-q-icon" aria-hidden="true">🎓</span><span class="edu-q-name">HSC</span></span></td>
+<td class="edu-td-year" data-label="Year">2022</td>
+<td data-label="Institution">Saidpur Government College</td>
+<td class="edu-td-gpa" data-label="GPA">5.00</td>
+<td data-label="Achievement / Status"><span class="edu-status completed">✓ Completed</span></td>
+</tr>
+<tr class="edu-row-current">
+<td data-label="Qualification"><span class="edu-q-cell"><span class="edu-q-icon" aria-hidden="true">🚀</span><span class="edu-q-name">B.Sc. CSE</span></span></td>
+<td class="edu-td-year" data-label="Year">Ongoing · 2nd Year, 2nd Semester</td>
+<td data-label="Institution">HSTU, Dinajpur</td>
+<td class="edu-td-gpa na" data-label="GPA">—</td>
+<td data-label="Achievement / Status"><span class="edu-status ongoing"><span class="live-dot"></span>Ongoing</span><span class="edu-bsc-meta">Final Result: Not yet available</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </section>
 <section id="log">
@@ -1139,7 +1533,7 @@ toward Codeforces Expert.
 <div class="section-head">
 <div class="case-label"><span class="id">case_005</span> / submission.log</div>
 <h2 class="section-title">Log</h2>
-<p class="section-sub">Education and what's currently being built, timestamped.</p>
+<p class="section-sub">What's currently being built, timestamped.</p>
 </div>
 <div class="timeline">
 <div class="tl-item">
@@ -1149,7 +1543,7 @@ toward Codeforces Expert.
 <p class="tl-desc">Ranked up to Pupil on the secondary handle — one step further on the road to Expert.</p>
 <div class="tag-row"><span class="tag" style="color:var(--r-pupil); border-color:var(--r-pupil);">Pupil</span><span class="tag">Codeforces</span></div>
 </div>
-<div class="tl-item" id="education">
+<div class="tl-item">
 <div class="tl-date">🎓 Education · currently studying</div>
 <h4>B.Sc. in Computer Science & Engineering</h4>
 <div class="tl-org">Hajee Mohammad Danesh Science & Technology University (HSTU), Dinajpur, Bangladesh · 2nd Year, 2nd Semester</div>
@@ -1482,6 +1876,7 @@ window.location.href = mailto;
 // never to fabricated numbers.
 (function trackCodeforcesStats(){
 const HANDLE = 'Yea5inArafat';
+const SECOND_HANDLE = 'Arafat02';
 const REFRESH_MS = 5 * 60 * 1000; // refresh every 5 minutes
 
 const rankColor = {
@@ -1607,11 +2002,255 @@ if (stillLoading && /Loading/.test(stillLoading.textContent)) showError();
 }, 10000);
 })();
 
-// Live GitHub repositories for github.com/Yea5inArafat — real API data only.
-// Loading / error / rate-limit states are all shown honestly; nothing is
-// ever substituted with placeholder repos.
+// Codeforces "Tags Solved" analytics — id="cf-tags-script".
+// Fetches accepted submissions for BOTH handles (Yea5inArafat + Arafat02),
+// dedupes by contestId/problemsetName + index so a problem solved on either
+// handle (or resubmitted many times) is only ever counted once, tallies the
+// tags on each unique solved problem, and renders a donut chart + legend
+// from that real, live-computed data. Nothing here is hardcoded — if the
+// Codeforces API is unreachable, an honest error state (with retry) is shown
+// instead of any placeholder numbers.
+(function cfTagsAnalytics(){
+const HANDLE = 'Yea5inArafat';
+const SECOND_HANDLE = 'Arafat02';
+const cardEl = document.getElementById('cf-tags-card');
+const summaryEl = document.getElementById('cf-tags-summary');
+const bodyEl = document.getElementById('cf-tags-body');
+const errorEl = document.getElementById('cf-tags-error');
+const donutEl = document.getElementById('cf-tags-donut');
+const legendEl = document.getElementById('cf-tags-legend');
+const centerTotalEl = document.getElementById('cf-tags-total-unique');
+const tooltipEl = document.getElementById('cf-tags-tooltip');
+const retryBtn = document.getElementById('cf-tags-retry');
+if (!cardEl || !donutEl || !legendEl) return;
+
+const CACHE_KEY = 'cf-tags-cache-v1-' + HANDLE + '-' + SECOND_HANDLE;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min — avoids refetching on every visit within a session
+let loading = false;
+
+function statusUrl(handle){
+return `https://codeforces.com/api/user.status?handle=${encodeURIComponent(handle)}&from=1&count=10000`;
+}
+
+// Deterministic color per tag so chart segment and legend swatch always match,
+// without needing to store a palette anywhere.
+function colorForIndex(i, total){
+const hue = Math.round((i * 360) / Math.max(total, 1));
+return `hsl(${hue} 62% ${document.documentElement.getAttribute('data-theme') === 'dark' ? 58 : 46}%)`;
+}
+
+function aggregate(statusResults){
+// statusResults: array of {status, result} objects from user.status, one per handle.
+const uniqueSolved = new Map(); // key -> {tags, rating}
+statusResults.forEach(sd => {
+if (!sd || sd.status !== 'OK' || !Array.isArray(sd.result)) return;
+sd.result.forEach(sub => {
+if (sub.verdict !== 'OK' || !sub.problem) return;
+const key = `${sub.problem.contestId ?? sub.problem.problemsetName ?? 'x'}-${sub.problem.index}`;
+if (uniqueSolved.has(key)) return; // dedupe across both handles + resubmissions
+uniqueSolved.set(key, {
+tags: Array.isArray(sub.problem.tags) ? sub.problem.tags : [],
+rating: typeof sub.problem.rating === 'number' ? sub.problem.rating : null
+});
+});
+});
+
+const tagCounts = new Map();
+let taggedCount = 0;
+uniqueSolved.forEach(p => {
+if (p.tags.length) taggedCount++;
+p.tags.forEach(t => tagCounts.set(t, (tagCounts.get(t) || 0) + 1));
+});
+const tags = Array.from(tagCounts.entries())
+.map(([tag, count]) => ({ tag, count }))
+.sort((a, b) => b.count - a.count);
+
+return {
+totalUniqueSolved: uniqueSolved.size,
+totalTagged: taggedCount,
+tagsPracticed: tags.length,
+tags
+};
+}
+
+function polarToXY(cx, cy, r, angleDeg){
+const rad = (angleDeg - 90) * Math.PI / 180;
+return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function donutArcPath(cx, cy, rOuter, rInner, startAngle, endAngle){
+// Full-circle single-tag edge case: a 360° arc degenerates in SVG, so
+// nudge it a hair short of a full turn — visually identical.
+if (endAngle - startAngle >= 359.999) endAngle = startAngle + 359.999;
+const large = (endAngle - startAngle) > 180 ? 1 : 0;
+const p1 = polarToXY(cx, cy, rOuter, startAngle);
+const p2 = polarToXY(cx, cy, rOuter, endAngle);
+const p3 = polarToXY(cx, cy, rInner, endAngle);
+const p4 = polarToXY(cx, cy, rInner, startAngle);
+return [
+`M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`,
+`A ${rOuter} ${rOuter} 0 ${large} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`,
+`L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)}`,
+`A ${rInner} ${rInner} 0 ${large} 0 ${p4.x.toFixed(2)} ${p4.y.toFixed(2)}`,
+'Z'
+].join(' ');
+}
+
+function positionTooltip(evt){
+if (!tooltipEl) return;
+const pad = 14;
+let x = evt.clientX + pad, y = evt.clientY + pad;
+const rect = tooltipEl.getBoundingClientRect();
+if (x + rect.width > window.innerWidth - 8) x = evt.clientX - rect.width - pad;
+if (y + rect.height > window.innerHeight - 8) y = evt.clientY - rect.height - pad;
+tooltipEl.style.left = x + 'px';
+tooltipEl.style.top = y + 'px';
+}
+
+function showTooltip(evt, tag, count, pct){
+if (!tooltipEl) return;
+tooltipEl.innerHTML = `<b>${tag}</b>${count} solved · ${pct}% of tagged`;
+tooltipEl.classList.add('show');
+tooltipEl.setAttribute('aria-hidden', 'false');
+positionTooltip(evt);
+}
+function hideTooltip(){
+if (!tooltipEl) return;
+tooltipEl.classList.remove('show');
+tooltipEl.setAttribute('aria-hidden', 'true');
+}
+
+function render(data){
+if (!data.tagsPracticed){
+// Valid response, just nothing tagged yet — still an honest state, not an error.
+summaryEl.innerHTML = `<p style="font-family:var(--font-mono); font-size:12px; color:var(--ink-dim);">No tagged solved problems returned by the Codeforces API yet.</p>`;
+bodyEl.style.display = 'none';
+return;
+}
+
+const topTag = data.tags[0];
+summaryEl.innerHTML = `<div class="cf-tags-stats-row">
+<div><b>${data.totalUniqueSolved}</b>unique solved</div>
+<div><b>${data.totalTagged}</b>tagged problems</div>
+<div><b>${data.tagsPracticed}</b>tags practiced</div>
+<div><b style="text-transform:capitalize;">${topTag.tag}</b>most practiced</div>
+</div>`;
+
+centerTotalEl.textContent = data.totalUniqueSolved;
+
+const cx = 110, cy = 110, rOuter = 100, rInner = 62;
+let angle = 0;
+const paths = [];
+const legendItems = [];
+data.tags.forEach((t, i) => {
+const pct = Math.round((t.count / data.totalTagged) * 1000) / 10;
+const sweep = (t.count / data.totalTagged) * 360;
+const color = colorForIndex(i, data.tags.length);
+const d = donutArcPath(cx, cy, rOuter, rInner, angle, angle + sweep);
+angle += sweep;
+paths.push({ d, color, tag: t.tag, count: t.count, pct, idx: i });
+legendItems.push({ color, tag: t.tag, count: t.count, pct, idx: i });
+});
+
+donutEl.innerHTML = paths.map(p =>
+`<path d="${p.d}" fill="${p.color}" data-tag-idx="${p.idx}"></path>`
+).join('');
+
+// Show top 20 tags in the legend (list still scrolls) — keeps the DOM
+// light while covering effectively every practiced topic in practice.
+legendEl.innerHTML = legendItems.slice(0, 20).map(l =>
+`<li data-tag-idx="${l.idx}"><span class="sw" style="background:${l.color};"></span><span class="nm">${l.tag}</span><span class="ct">${l.count}</span><span class="pc">${l.pct}%</span></li>`
+).join('');
+
+// Cross-highlight + shared tooltip between chart segments and legend rows.
+function wireHover(el, selectorSelf){
+el.addEventListener('mousemove', evt => {
+const target = evt.target.closest('[data-tag-idx]');
+if (!target) return;
+const idx = target.getAttribute('data-tag-idx');
+document.querySelectorAll(`[data-tag-idx="${idx}"]`).forEach(n => n.classList.add('hover'));
+const item = legendItems[Number(idx)];
+if (item) showTooltip(evt, item.tag, item.count, item.pct);
+});
+el.addEventListener('mouseleave', () => {
+document.querySelectorAll('.hover').forEach(n => n.classList.remove('hover'));
+hideTooltip();
+});
+el.addEventListener('mouseout', evt => {
+const left = evt.target.closest('[data-tag-idx]');
+const to = evt.relatedTarget && evt.relatedTarget.closest ? evt.relatedTarget.closest('[data-tag-idx]') : null;
+if (left && (!to || to.getAttribute('data-tag-idx') !== left.getAttribute('data-tag-idx'))){
+document.querySelectorAll('.hover').forEach(n => n.classList.remove('hover'));
+}
+});
+}
+wireHover(donutEl);
+wireHover(legendEl);
+
+document.getElementById('cf-tags-loading') && (document.getElementById('cf-tags-loading').style.display = 'none');
+bodyEl.style.display = 'grid';
+errorEl.style.display = 'none';
+}
+
+function showTagsError(){
+bodyEl.style.display = 'none';
+errorEl.style.display = 'block';
+}
+
+function load(force){
+if (loading) return;
+if (!force){
+try {
+const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+if (cached && (Date.now() - cached.at) < CACHE_TTL_MS){
+render(cached.data);
+return;
+}
+} catch (e) { /* ignore malformed cache, refetch */ }
+}
+loading = true;
+errorEl.style.display = 'none';
+Promise.all([
+fetch(statusUrl(HANDLE)).then(r => r.json()).catch(() => null),
+fetch(statusUrl(SECOND_HANDLE)).then(r => r.json()).catch(() => null)
+])
+.then(results => {
+loading = false;
+if (!results.some(r => r && r.status === 'OK')) throw new Error('both requests failed');
+const data = aggregate(results);
+try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch (e) { /* storage full/unavailable — fine, just skip caching */ }
+render(data);
+})
+.catch(() => { loading = false; showTagsError(); });
+}
+
+if (retryBtn) retryBtn.addEventListener('click', () => load(true));
+load(false);
+})();
+
+// GitHub repositories for github.com/Yea5inArafat, served through the
+// /api/github serverless endpoint (which does the actual GitHub call,
+// cached at the CDN for an hour). This keeps every visitor's browser from
+// hitting GitHub's unauthenticated 60 req/hr limit directly.
+//
+// Fallback priority, in order:
+//   1. Fresh /api/github response
+//   2. Previously cached response in localStorage (shown instantly, then
+//      refreshed silently; also used if a fresh request fails)
+//   3. A small verified local dataset (data below — nothing invented)
+//   4. A plain "temporarily unavailable" state with a link to the profile
+//
+// The loading state can never hang indefinitely: every fetch has an abort
+// timeout, plus a hard safety-net timeout that forces a fallback regardless
+// of what the network is doing.
 (function loadGitHubRepos(){
 const USER = 'Yea5inArafat';
+const API_URL = '/api/github';
+const STORAGE_KEY = 'gh-repos-cache-v2'; // v2: field shape changed to githubUrl/liveUrl
+const FETCH_TIMEOUT_MS = 8000;
+const HARD_TIMEOUT_MS = 11000;
+const MAX_RETRIES = 1; // one limited retry for transient failures only — never loop
+
 const statusEl = document.getElementById('gh-status');
 const gridEl = document.getElementById('gh-grid');
 if (!statusEl || !gridEl) return;
@@ -1621,59 +2260,191 @@ JavaScript:'#E8C547', TypeScript:'#2F6FE4', Python:'#12A454', Kotlin:'#8A44D8',
 HTML:'#D6483F', CSS:'#2F6FE4', C:'#66748A', 'C++':'#0FA3A3', Java:'#C98A1A'
 };
 
-fetch(`https://api.github.com/users/${USER}/repos?sort=updated&per_page=12`, {
-headers: { 'Accept': 'application/vnd.github+json' }
-})
-.then(r => {
-if (r.status === 403) throw new Error('rate-limited');
-if (!r.ok) throw new Error('http-' + r.status);
-return r.json();
-})
-.then(repos => {
+// Verified fallback — every field here already appears elsewhere in this
+// portfolio (see #projects / Scoreboard). No invented stars, languages,
+// or descriptions. Used only if the API and the local cache both fail.
+const LOCAL_FALLBACK = [{
+id: 'profolio-fallback',
+name: 'Profolio',
+full_name: 'Yea5inArafat/Profolio',
+description: 'An interactive developer portfolio with live Codeforces stats, an online-judge-inspired theme, and a fully responsive layout.',
+githubUrl: 'https://github.com/Yea5inArafat/Profolio',
+liveUrl: 'https://yea5inarafat.vercel.app/',
+language: 'HTML',
+stars: 0,
+forks: 0,
+updatedAt: null,
+topics: []
+}];
+
+// Belt-and-suspenders client-side guard: even though /api/github already
+// validates liveUrl server-side, never render a Live Demo button unless
+// the value is genuinely a usable absolute http(s) URL. Protects against
+// stale localStorage cache from an older/different data shape too.
+function isUsableUrl(value){
+if (typeof value !== 'string') return false;
+const trimmed = value.trim();
+if (!trimmed) return false;
+try {
+const parsed = new URL(trimmed);
+return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+} catch (e){
+return false;
+}
+}
+
+function readCache(){
+try {
+const raw = localStorage.getItem(STORAGE_KEY);
+if (!raw) return null;
+const parsed = JSON.parse(raw);
+if (!parsed || !Array.isArray(parsed.repos) || !parsed.repos.length) return null;
+return parsed;
+} catch (e){ return null; }
+}
+
+function writeCache(repos){
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ repos: repos, savedAt: Date.now() })); }
+catch (e){ /* storage unavailable/full — non-fatal, API stays source of truth */ }
+}
+
+function formatUpdated(iso){
+if (!iso) return 'update date unknown';
+const d = new Date(iso);
+if (isNaN(d.getTime())) return 'update date unknown';
+const diffDays = Math.floor((Date.now() - d.getTime()) / 86400000);
+if (diffDays <= 0) return 'Updated today';
+if (diffDays === 1) return 'Updated yesterday';
+if (diffDays < 30) return `Updated ${diffDays} days ago`;
+return `Updated ${d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}`;
+}
+
+function renderRepos(repos, opts){
+opts = opts || {};
 statusEl.classList.remove('skel');
 if (!Array.isArray(repos) || repos.length === 0){
-statusEl.textContent = 'No public repositories returned by the GitHub API right now.';
+statusEl.textContent = 'No public repositories to show right now.';
+gridEl.innerHTML = '';
 return;
 }
-statusEl.textContent = `${repos.length} public repositories · live from the GitHub API`;
+const note = opts.stale
+? ' · showing cached repositories'
+: (opts.fallback ? ' · showing saved repository info' : ' · live from the GitHub API');
+statusEl.textContent = `${repos.length} public ${repos.length === 1 ? 'repository' : 'repositories'}${note}`;
 gridEl.innerHTML = repos.map(repo => {
 const lang = repo.language || null;
 const color = lang && langColor[lang] ? langColor[lang] : 'var(--ink-dim)';
-const updated = repo.updated_at ? new Date(repo.updated_at).toLocaleDateString('en-GB', { year:'numeric', month:'short', day:'numeric' }) : '—';
-const desc = repo.description ? repo.description.replace(/[<>]/g, '') : 'No description provided.';
+const updated = formatUpdated(repo.updatedAt);
+const desc = repo.description ? String(repo.description).replace(/[<>]/g, '') : 'No description provided.';
+const topics = Array.isArray(repo.topics) && repo.topics.length
+? `<div class="tag-row" style="margin-top:0;">${repo.topics.slice(0, 5).map(t => `<span class="tag">${String(t).replace(/[<>]/g, '')}</span>`).join('')}</div>`
+: '';
+// Only ever render a Live Demo button for a genuinely usable URL, and
+// never let it silently fall back to the GitHub repo URL.
+const liveBtn = isUsableUrl(repo.liveUrl)
+? `<a class="btn btn-ghost btn-sm gh-live-btn" href="${repo.liveUrl}" target="_blank" rel="noopener noreferrer" aria-label="Open live demo of ${repo.name}">↗ Live demo</a>`
+: '';
+const githubHref = isUsableUrl(repo.githubUrl) ? repo.githubUrl : `https://github.com/${USER}`;
 return `<div class="card gh-repo-card" data-planet-content="github">
 <div class="gh-name">${repo.name}</div>
 <div class="gh-desc">${desc}</div>
+${topics}
 <div class="gh-repo-meta">
 ${lang ? `<span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;"></span>${lang}</span>` : ''}
-<span>★ ${repo.stargazers_count}</span>
-<span>⑂ ${repo.forks_count}</span>
-<span>Updated ${updated}</span>
+<span>★ ${repo.stars || 0}</span>
+<span>⑂ ${repo.forks || 0}</span>
+<span>${updated}</span>
 </div>
-<a class="btn btn-ghost btn-sm" href="${repo.html_url}" target="_blank" rel="noopener noreferrer" style="align-self:flex-start;">View repo</a>
+<div style="display:flex; gap:8px; flex-wrap:wrap;">
+<a class="btn btn-ghost btn-sm" href="${githubHref}" target="_blank" rel="noopener noreferrer" aria-label="View ${repo.name} on GitHub">GitHub</a>
+${liveBtn}
+</div>
 </div>`;
 }).join('');
-})
-.catch(err => {
-statusEl.classList.remove('skel');
-const msg = err && err.message === 'rate-limited'
-? 'GitHub API rate limit reached — try again in a few minutes, or view the profile directly.'
-: 'GitHub stats temporarily unavailable — view the profile directly.';
-statusEl.innerHTML = `${msg} <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
-const retryBtn = document.getElementById('gh-retry-btn');
-if (retryBtn) retryBtn.addEventListener('click', () => { statusEl.classList.add('skel'); statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
-});
-
-// Safety net: force an honest "unavailable" state after 10s if the
-// request never resolves either way, instead of an endless spinner state.
-setTimeout(() => {
-if (statusEl.textContent === 'Loading repositories…'){
-statusEl.classList.remove('skel');
-statusEl.innerHTML = `GitHub data is taking too long to load — view the profile directly. <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn2" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
-const retryBtn2 = document.getElementById('gh-retry-btn2');
-if (retryBtn2) retryBtn2.addEventListener('click', () => { statusEl.classList.add('skel'); statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
 }
-}, 10000);
+
+function showFriendlyError(){
+statusEl.classList.remove('skel');
+statusEl.innerHTML = `GitHub repositories are temporarily unavailable. <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">View GitHub Profile ↗</a> <button type="button" id="gh-retry-btn" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
+gridEl.innerHTML = '';
+const retryBtn = document.getElementById('gh-retry-btn');
+if (retryBtn) retryBtn.addEventListener('click', () => {
+statusEl.classList.add('skel');
+statusEl.textContent = 'Loading repositories…';
+load(0);
+});
+}
+
+function fallbackAfterFailure(){
+const cached = readCache();
+if (cached){
+renderRepos(cached.repos, { stale: true });
+} else if (LOCAL_FALLBACK.length){
+renderRepos(LOCAL_FALLBACK, { fallback: true });
+} else {
+showFriendlyError();
+}
+}
+
+function load(attempt){
+attempt = attempt || 0;
+let settled = false;
+
+// Absolute safety net: whatever the fetch below is doing, force a
+// resolved state (cache, fallback, or friendly error) after this — the
+// section can never remain on "Loading repositories…" indefinitely.
+const hardTimeout = setTimeout(() => {
+if (settled) return;
+settled = true;
+fallbackAfterFailure();
+}, HARD_TIMEOUT_MS);
+
+const controller = new AbortController();
+const abortTimer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+fetch(API_URL, { headers: { Accept: 'application/json' }, signal: controller.signal })
+.then(r => r.json().catch(() => null).then(body => ({ ok: r.ok, status: r.status, body: body })))
+.then(({ ok, status, body }) => {
+clearTimeout(abortTimer);
+if (settled) return;
+if (ok && body && Array.isArray(body.repos)){
+settled = true;
+clearTimeout(hardTimeout);
+writeCache(body.repos);
+renderRepos(body.repos);
+return;
+}
+// Transient issue worth one limited retry (rate limit / upstream 5xx /
+// our own timeout status) — never an unbounded retry loop.
+const transient = status === 429 || status === 502 || status === 504;
+if (transient && attempt < MAX_RETRIES){
+setTimeout(() => { if (!settled) load(attempt + 1); }, 1500);
+return;
+}
+settled = true;
+clearTimeout(hardTimeout);
+fallbackAfterFailure();
+})
+.catch(() => {
+clearTimeout(abortTimer);
+if (settled) return;
+if (attempt < MAX_RETRIES){
+setTimeout(() => { if (!settled) load(attempt + 1); }, 1500);
+return;
+}
+settled = true;
+clearTimeout(hardTimeout);
+fallbackAfterFailure();
+});
+}
+
+// Show cached data instantly on repeat visits (better than a spinner),
+// then let load() silently refresh it from the API underneath.
+const initialCache = readCache();
+if (initialCache){
+renderRepos(initialCache.repos, { stale: true });
+}
+load(0);
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1690,7 +2461,7 @@ const isLowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurren
 const targets = document.querySelectorAll(
 '.section-head, .spec-card, .focus-grid, .skills-tabs, .learning-strip, ' +
 '.scoreboard, #projects .card, #cp .cp-rating-card, #cp .cp-goal-card, ' +
-'.tl-item, .resume-box, .contact-grid > div, .profile-card'
+'.tl-item, .resume-box, .contact-grid > div, .profile-card, .edu-table-wrap'
 );
 if (reduceMotion){ targets.forEach(t => t.classList.add('reveal', 'in-view')); return; }
 targets.forEach(t => t.classList.add('reveal'));
@@ -1896,6 +2667,7 @@ const SECTIONS = [
 { id:'projects', label:'WORK',        color:0xC98A1A },
 { id:'github',   label:'GITHUB',      color:0x9AA8BC },
 { id:'cp',       label:'CODEFORCES',  color:0x8A44D8 },
+{ id:'coding-profiles', label:'PROFILES', color:0xFFA116 },
 { id:'education',label:'EDUCATION',   color:0x0FA3A3 },
 { id:'resume',   label:'RESUME',      color:0xE8ECF3 },
 { id:'contact',  label:'CONTACT',     color:0xD6483F }
@@ -2224,6 +2996,7 @@ const CMDS = [
 { id:'projects', label:'/projects', hint:'Jump to Project galaxy' },
 { id:'github', label:'/github', hint:'Jump to GitHub galaxy' },
 { id:'cp', label:'/codeforces', hint:'Jump to Codeforces arena' },
+{ id:'coding-profiles', label:'/profiles', hint:'Jump to Coding profiles' },
 { id:'education', label:'/education', hint:'Jump to Education timeline' },
 { id:'resume', label:'/resume', hint:'Jump to Resume' },
 { id:'contact', label:'/contact', hint:'Jump to Contact portal' },
@@ -2293,7 +3066,7 @@ const cmd = raw.trim().toLowerCase();
 termPrint('> ' + raw, 't-cmd');
 switch(cmd){
 case 'help':
-termPrint('help · about · projects · skills · github · cf · resume · contact · clear · universe');
+termPrint('help · about · projects · skills · github · cf · profiles · education · resume · contact · clear · universe');
 break;
 case 'about':
 termPrint(textOf('#about .quick-facts') || 'About data unavailable.');
@@ -2314,6 +3087,14 @@ break;
 case 'cf':
 termPrint(`rating: ${textOf('#cf-current-rating')} · max: ${textOf('#cf-max-rating')} · rank: ${textOf('#cf-rank')} · solved: ${textOf('#cf-solved')}`);
 enterPlanet('cp');
+break;
+case 'profiles':
+termPrint(textOfAll('#coding-profiles .platform-name').join(', ') || 'Coding profile cards unavailable.');
+enterPlanet('coding-profiles');
+break;
+case 'education':
+termPrint(textOfAll('#edu-table-body .edu-q-name').join(', ') || 'Education table unavailable.');
+enterPlanet('education');
 break;
 case 'resume':
 termPrint('Opening resume — download link is in the panel.');

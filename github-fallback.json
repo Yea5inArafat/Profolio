@@ -1,0 +1,18 @@
+{
+  "note": "Verified fallback only. Every field here is taken from information already present elsewhere in this portfolio (see the Scoreboard/#projects section). liveUrl values must be real, confirmed deployments — never a guessed vercel.app/netlify.app URL, and never the same value as githubUrl. Do not add repositories, stars, forks, or descriptions that are not independently verified — if a new repo needs to be added here, confirm its real data (and that liveUrl actually loads) on github.com/Yea5inArafat first.",
+  "repos": [
+    {
+      "id": "profolio-fallback",
+      "name": "Profolio",
+      "full_name": "Yea5inArafat/Profolio",
+      "description": "An interactive developer portfolio with live Codeforces stats, an online-judge-inspired theme, and a fully responsive layout.",
+      "githubUrl": "https://github.com/Yea5inArafat/Profolio",
+      "liveUrl": "https://yea5inarafat.vercel.app/",
+      "language": "HTML",
+      "stars": 0,
+      "forks": 0,
+      "updatedAt": null,
+      "topics": []
+    }
+  ]
+}
