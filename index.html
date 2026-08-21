@@ -78,7 +78,7 @@ line-height:1.6; overflow-x:hidden;
 background-image:
 linear-gradient(var(--grid-line) 1px, transparent 1px),
 linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-background-size:34px 34px;
+background-size:68px 68px;
 transition:background-color .4s ease, color .3s ease;
 }
 html[data-theme="dark"] body{ background-image:none; }
@@ -432,17 +432,16 @@ section{padding:70px 0;}
 
 /* ================= UNIVERSE LAYER ================= */
 #universe-stage{position:fixed; inset:0; z-index:600; pointer-events:none;}
-#universe-canvas{position:fixed; inset:0; width:100%; height:100%; display:block; z-index:1; transition:opacity .6s ease; pointer-events:auto;}
-#universe-stage.landed #universe-canvas{opacity:.28;}
-#universe-hud{position:fixed; inset:0; z-index:2; pointer-events:none;}
+#universe-canvas{position:fixed; inset:0; width:100%; height:100%; display:block; z-index:-1; transition:opacity .5s ease; pointer-events:auto;}
+#universe-hud{position:fixed; inset:0; z-index:2; pointer-events:none; transition:opacity .3s ease;}
 .planet-label{
-position:absolute; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;
+position:absolute; transform:translate(-50%,-50%); pointer-events:none; cursor:pointer;
 font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink);
 background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 border:1px solid var(--border); border-radius:999px; padding:6px 13px;
 white-space:nowrap; opacity:0; transition:opacity .3s ease, transform .2s ease, border-color .2s ease;
 }
-.planet-label.visible{opacity:.92;}
+.planet-label.visible{opacity:.92; pointer-events:auto;}
 .planet-label:hover{border-color:var(--ac); transform:translate(-50%,-50%) scale(1.06);}
 .planet-label .dot{display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:7px; vertical-align:middle;}
 #universe-topbar{
@@ -544,8 +543,12 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 </div>
 
 <!-- 3D universe canvas + HUD (sits over the real, accessible page) -->
+<!-- Universe canvas sits behind all real content (negative z-index) so it
+     never intercepts clicks meant for the page — same pattern as bg-canvas. -->
+<canvas id="universe-canvas" aria-hidden="true"></canvas>
+<!-- 3D HUD (planet labels) sits above content only near the hero, so it
+     can be clicked, but never blocks anything below it. -->
 <div id="universe-stage" aria-hidden="true">
-<canvas id="universe-canvas"></canvas>
 <div id="universe-hud"></div>
 </div>
 <div id="universe-topbar" role="navigation" aria-label="Universe navigation">
@@ -1531,6 +1534,7 @@ function enterClassicMode(){
 // The honest fallback: hide the universe chrome entirely, leave the
 // already-built accessible glass site (from the layer above) as-is.
 document.getElementById('universe-loading').classList.add('hidden');
+document.getElementById('universe-canvas').style.display = 'none';
 document.getElementById('universe-stage').style.display = 'none';
 document.getElementById('universe-topbar').style.display = 'none';
 document.getElementById('return-universe-btn').style.display = 'none';
@@ -1538,7 +1542,7 @@ document.getElementById('quality-badge').style.display = 'none';
 body.classList.add('classic-mode');
 }
 
-if (typeof THREE === 'undefined' || !webglAvailable()){
+if (typeof THREE === 'undefined' || !webglAvailable() || reduceMotion){
 enterClassicMode();
 return;
 }
@@ -1652,16 +1656,26 @@ hud.appendChild(el);
 s.labelEl = el;
 });
 
+const heroEl = document.getElementById('hero');
 function updateLabels(){
-const v = new THREE.Vector3();
+const world = new THREE.Vector3();
+const camSpace = new THREE.Vector3();
+// Only show the floating labels while the hero (universe view) is still
+// on screen — once the user has scrolled into real content, labels
+// staying pinned over that content would just be visual clutter.
+const heroRect = heroEl.getBoundingClientRect();
+const nearHero = heroRect.bottom > 0 && !landed;
 SECTIONS.forEach((s) => {
-s.mesh.getWorldPosition(v);
-v.project(camera);
-const inView = v.z < 1 && v.x > -1.15 && v.x < 1.15 && v.y > -1.15 && v.y < 1.15;
-s.labelEl.classList.toggle('visible', inView && !landed);
-if (inView){
-s.labelEl.style.left = ((v.x * 0.5 + 0.5) * window.innerWidth) + 'px';
-s.labelEl.style.top = ((-v.y * 0.5 + 0.5) * window.innerHeight - 26) + 'px';
+s.mesh.getWorldPosition(world);
+camSpace.copy(world).applyMatrix4(camera.matrixWorldInverse);
+const inFront = camSpace.z < 0; // three.js cameras look down -Z locally
+const proj = world.clone().project(camera);
+const onScreen = proj.x > -1.1 && proj.x < 1.1 && proj.y > -1.1 && proj.y < 1.1;
+const visible = nearHero && inFront && onScreen;
+s.labelEl.classList.toggle('visible', visible);
+if (visible){
+s.labelEl.style.left = ((proj.x * 0.5 + 0.5) * window.innerWidth) + 'px';
+s.labelEl.style.top = ((-proj.y * 0.5 + 0.5) * window.innerHeight - 26) + 'px';
 }
 });
 }
@@ -1698,12 +1712,21 @@ if (hit) enterPlanet(hit.object.userData.section.id);
 
 /* ---------- Touch drag to orbit the overview camera ---------- */
 let dragging = false, lastX = 0, lastY = 0, yaw = 0, pitch = 0.14;
+function applyOrbitPosition(){
+// Only called from an actual drag move, never per-frame — so it can never
+// fight with WASD free-fly, which just adds deltas straight to the camera.
+const dist = OVERVIEW_POS.length();
+camera.position.x = Math.sin(yaw) * dist * Math.cos(pitch);
+camera.position.z = Math.cos(yaw) * dist * Math.cos(pitch);
+camera.position.y = OVERVIEW_POS.y + Math.sin(pitch) * dist * 0.3;
+}
 function onDragStart(x, y){ if (landed) return; dragging = true; lastX = x; lastY = y; }
 function onDragMove(x, y){
 if (!dragging || landed) return;
 yaw += (x - lastX) * 0.004;
 pitch = Math.max(-0.5, Math.min(0.5, pitch + (y - lastY) * 0.003));
 lastX = x; lastY = y;
+applyOrbitPosition();
 }
 function onDragEnd(){ dragging = false; }
 canvas.addEventListener('mousedown', (e) => onDragStart(e.clientX, e.clientY));
@@ -1740,6 +1763,7 @@ closeOverlays();
 landed = true;
 document.getElementById('universe-stage').classList.add('landed');
 document.getElementById('return-universe-btn').style.display = 'inline-flex';
+canvas.style.opacity = '0.28';
 
 const worldPos = new THREE.Vector3();
 s.mesh.getWorldPosition(worldPos);
@@ -1757,6 +1781,7 @@ if (!landed) return;
 landed = false;
 document.getElementById('universe-stage').classList.remove('landed');
 document.getElementById('return-universe-btn').style.display = 'none';
+canvas.style.opacity = '1';
 window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
 flyTo(OVERVIEW_POS, OVERVIEW_LOOK, reduceMotion ? 1 : 900);
 history.replaceState(null, '', '#hero');
@@ -1963,14 +1988,8 @@ currentLook.lerpVectors(flight.fromLook, flight.toLook, e);
 camera.lookAt(currentLook);
 if (t >= 1){ const done = flight.onDone; flight = null; if (done) done(); }
 } else if (!landed){
-// Manual drag/orbit takes precedence over the resting position once the
-// user has touched the universe at all (yaw/pitch stay nonzero after release).
-if (dragging || yaw !== 0 || pitch !== 0.14){
-const dist = OVERVIEW_POS.length();
-camera.position.x = Math.sin(yaw) * dist;
-camera.position.z = Math.cos(yaw) * dist;
-camera.position.y = OVERVIEW_POS.y + pitch * 200;
-}
+// Orbit position is only set from actual drag events (see applyOrbitPosition);
+// WASD just adds a persistent delta on top, so the two never fight.
 if (!isTouch){
 const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
 const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
@@ -1983,8 +2002,10 @@ if (keys['d']) camera.position.addScaledVector(right, speed);
 camera.lookAt(currentLook.set(0, 0, 0));
 }
 
-updateLabels();
+// Render first so camera.matrixWorldInverse is current for this frame's
+// label projection (three.js updates it inside render(), not before).
 renderer.render(scene, camera);
+updateLabels();
 }
 requestAnimationFrame(animate);
 }
