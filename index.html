@@ -565,20 +565,31 @@ transition:color .2s ease, border-color .2s ease, transform .15s ease;
 flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:36px;
 padding:0 26px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
 perspective:800px; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
-position:relative; z-index:1;
+position:relative; z-index:1; cursor:grab; touch-action:pan-x;
+scroll-snap-type:x proximity; scroll-behavior:smooth;
 }
+#solar-nav-track.dragging{ cursor:grabbing; scroll-behavior:auto; scroll-snap-type:none; }
 #solar-nav-track::-webkit-scrollbar{height:4px;}
 #solar-nav-track::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
 .solar-planet{
 flex:0 0 auto; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
 padding:6px 4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.02em; color:var(--ink-dim);
-transform-style:preserve-3d; transition:transform .25s cubic-bezier(.16,.8,.24,1), color .2s ease;
+transform-style:preserve-3d; transition:transform .25s cubic-bezier(.16,.8,.24,1), color .2s ease, opacity .25s ease;
+scroll-snap-align:center;
 /* Curved/wave orbital wrap: each planet carries a small, fixed vertical
    offset (below) so the linear row reads as a gentle orbital arc once
    the container is too narrow to lay everything flat — DOM/tab/click
    order never changes, only the y-position of each item. Disabled by
-   default (0px) and only switched on at the narrower breakpoints. */
-transform:translateY(var(--solar-wave, 0px));
+   default (0px) and only switched on at the narrower breakpoints.
+   --solar-dist (0 = centered in the nav viewport, 1 = at the edge) is
+   written by JS on scroll/resize (rAF-throttled) and only ever read
+   here — the transition above turns those discrete updates into the
+   smooth "closer = bigger/brighter" depth feel without a manual JS
+   lerp loop. .active/:hover below intentionally override this whole
+   transform so the focused planet always reads at full prominence
+   regardless of where it happens to sit in the scrollable track. */
+transform:translateY(var(--solar-wave, 0px)) scale(calc(1 - var(--solar-dist, 0) * 0.16));
+opacity:calc(1 - var(--solar-dist, 0) * 0.45);
 }
 .solar-orbit-ring{
 position:absolute; top:50%; left:50%; width:42px; height:42px; margin:-21px 0 0 -21px;
@@ -605,13 +616,13 @@ animation:solarPlanetBob 5.5s ease-in-out infinite;
 @keyframes solarRingSpin{ from{ transform:rotateX(58deg) rotate(0deg); } to{ transform:rotateX(58deg) rotate(360deg); } }
 @keyframes solarPlanetBob{ 0%,100%{ transform:translateZ(8px) translateY(0); } 50%{ transform:translateZ(8px) translateY(-2.5px); } }
 .solar-text{ transition:color .2s ease; }
-.solar-planet:hover{ color:var(--ink); transform:translateY(calc(var(--solar-wave, 0px) - 2px)) rotateX(6deg) scale(1.08); }
+.solar-planet:hover{ color:var(--ink); opacity:1; transform:translateY(calc(var(--solar-wave, 0px) - 2px)) rotateX(6deg) scale(1.08); }
 .solar-planet:hover .solar-orbit-ring{ border-color:var(--ac); opacity:.85; animation-play-state:paused; }
 .solar-planet:hover .solar-emoji{ filter:drop-shadow(0 0 6px var(--glow-ac)); animation-play-state:paused; }
 .solar-planet:focus-visible{ outline:2px solid var(--ac); outline-offset:4px; border-radius:8px; }
 .solar-planet:focus-visible .solar-orbit-ring,
 .solar-planet:focus-visible .solar-emoji{ animation-play-state:paused; }
-.solar-planet.active{ color:var(--ac); transform:translateY(calc(var(--solar-wave, 0px) - 2px)) scale(1.18); }
+.solar-planet.active{ color:var(--ac); opacity:1; transform:translateY(calc(var(--solar-wave, 0px) - 2px)) scale(1.18); }
 .solar-planet.active .solar-orbit-ring{
 border-color:var(--ac); opacity:1; width:50px; height:50px; margin:-25px 0 0 -25px;
 box-shadow:0 0 16px -2px var(--glow-ac);
@@ -668,7 +679,8 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 }
 @media (prefers-reduced-motion: reduce){
 .solar-planet, .solar-orbit-ring, .solar-emoji, .solar-ctrl-btn{ transition:none; animation:none; }
-.solar-planet:hover, .solar-planet.active{ transform:translateY(var(--solar-wave, 0px)); }
+.solar-planet, .solar-planet:hover, .solar-planet.active{ transform:translateY(var(--solar-wave, 0px)); opacity:1; }
+#solar-nav-track{ scroll-behavior:auto; scroll-snap-type:none; }
 }
 </style>
 </head>
@@ -735,6 +747,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <li><a href="#github">repos</a></li>
 <li><a href="#cp">rating</a></li>
 <li><a href="#log">log</a></li>
+<li><a href="#resume">resume</a></li>
 <li><a href="#contact">submit</a></li>
 </ul>
 <div class="nav-actions">
@@ -801,6 +814,11 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <span class="solar-emoji" aria-hidden="true">🌙</span>
 <span class="solar-text">Edu</span>
 </a>
+<a href="#resume" class="solar-planet" role="listitem" aria-label="Resume">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">📄</span>
+<span class="solar-text">Resume</span>
+</a>
 <a href="#contact" class="solar-planet" role="listitem" aria-label="Contact">
 <span class="solar-orbit-ring" aria-hidden="true"></span>
 <span class="solar-emoji" aria-hidden="true">🚀</span>
@@ -818,6 +836,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <a href="#github">repos</a>
 <a href="#cp">rating</a>
 <a href="#log">log</a>
+<a href="#resume">resume</a>
 <a href="#contact">submit</a>
 </div>
 <section id="hero">
@@ -1532,6 +1551,14 @@ setText('cf-solved', solved.size);
 
 fetchStats();
 setInterval(fetchStats, REFRESH_MS);
+
+// Safety net: if nothing has resolved (success or error) within 10s —
+// e.g. a request that hangs instead of failing outright — force the
+// honest "unavailable" state instead of leaving "Loading…" forever.
+setTimeout(() => {
+const stillLoading = document.getElementById('cf-live-note-hero');
+if (stillLoading && /Loading/.test(stillLoading.textContent)) showError();
+}, 10000);
 })();
 
 // Live GitHub repositories for github.com/Yea5inArafat — real API data only.
@@ -1584,8 +1611,20 @@ ${lang ? `<span><span class="dot" style="display:inline-block;width:8px;height:8
 const msg = err && err.message === 'rate-limited'
 ? 'GitHub API rate limit reached — try again in a few minutes, or view the profile directly.'
 : 'GitHub data unavailable right now — view the profile directly.';
-statusEl.innerHTML = `${msg} <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a>`;
+statusEl.innerHTML = `${msg} <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
+const retryBtn = document.getElementById('gh-retry-btn');
+if (retryBtn) retryBtn.addEventListener('click', () => { statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
 });
+
+// Safety net: force an honest "unavailable" state after 10s if the
+// request never resolves either way, instead of an endless spinner state.
+setTimeout(() => {
+if (statusEl.textContent === 'Loading repositories…'){
+statusEl.innerHTML = `GitHub data is taking too long to load — view the profile directly. <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn2" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
+const retryBtn2 = document.getElementById('gh-retry-btn2');
+if (retryBtn2) retryBtn2.addEventListener('click', () => { statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
+}
+}, 10000);
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -2396,11 +2435,24 @@ skipBtn.addEventListener('click', () => { markSeen(); enterClassicMode(); });
 })();
 </script>
 
-<!-- NEW FEATURE script: wires the solar-nav's Search/Terminal buttons to
-     the EXISTING cmdk / terminal buttons (by dispatching a real click on
-     them, so the original handlers run completely unmodified), and drives
-     the active-planet highlighting. Fully separate IIFE — does not read
-     from or write to any variable in the script above. -->
+<!-- NEW FEATURE script v2: scroll-synchronized solar nav.
+     - Active planet is still driven by the same IntersectionObserver as
+       before (page scroll → active section → active planet).
+     - The active planet is auto-centered in the nav track via
+       scrollIntoView({inline:'center'}), but ONLY when the user isn't
+       currently interacting with the nav track themselves — this is
+       what prevents the "page scroll → nav scroll → page scroll" loop
+       the brief calls out: passive nav auto-centering never touches
+       window/page scroll, and manual nav scrolling never triggers page
+       scroll on its own (only an explicit planet click does).
+     - Manual scrolling of the track supports vertical mouse-wheel
+       (remapped to horizontal), native trackpad/touch, and mouse
+       drag-to-scroll.
+     - A rAF-throttled loop writes a --solar-dist custom property per
+       planet (distance from the track's visual center, 0–1) which the
+       stylesheet above turns into the "closer = bigger/brighter" depth
+       falloff via a CSS transition — no per-frame layout thrashing,
+       transform/opacity only. -->
 <script>
 (function(){
 'use strict';
@@ -2416,12 +2468,78 @@ if (termBtn && realTermBtn){
 termBtn.addEventListener('click', function(){ realTermBtn.click(); });
 }
 
+var track = document.getElementById('solar-nav-track');
 var planetLinks = Array.prototype.slice.call(document.querySelectorAll('#solar-nav-track .solar-planet'));
+if (!track || !planetLinks.length) return;
 
-function setActivePlanet(id){
+var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var activeId = null;
+
+/* ---------- Manual interaction tracking ----------
+   While true, automatic re-centering is paused so a user actively
+   dragging/scrolling the nav never gets yanked back mid-gesture. */
+var userInteracting = false;
+var interactingTimer = null;
+function markUserInteracting(){
+userInteracting = true;
+clearTimeout(interactingTimer);
+interactingTimer = setTimeout(function(){ userInteracting = false; }, 1000);
+}
+
+/* Vertical mouse-wheel → horizontal nav scroll (desktop mice have no
+   horizontal wheel axis). Shift+wheel and real trackpad horizontal
+   deltas already arrive as deltaX and pass through untouched. This
+   never touches window scroll, so it can't create a feedback loop. */
+track.addEventListener('wheel', function(e){
+if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+track.scrollLeft += e.deltaY;
+e.preventDefault();
+}
+markUserInteracting();
+}, { passive:false });
+
+/* Drag-to-scroll for desktop mice (touch already gets native swipe
+   scrolling for free via overflow-x:auto + touch-action:pan-x). */
+var dragging = false, dragStartX = 0, dragStartScroll = 0, dragMoved = false;
+track.addEventListener('mousedown', function(e){
+dragging = true; dragMoved = false;
+track.classList.add('dragging');
+dragStartX = e.pageX;
+dragStartScroll = track.scrollLeft;
+});
+window.addEventListener('mousemove', function(e){
+if (!dragging) return;
+var dx = e.pageX - dragStartX;
+if (Math.abs(dx) > 3) dragMoved = true;
+track.scrollLeft = dragStartScroll - dx;
+markUserInteracting();
+});
+window.addEventListener('mouseup', function(){
+if (dragging){ dragging = false; track.classList.remove('dragging'); }
+});
+// Suppress the click-triggered nav jump if the mousedown/up was actually
+// a drag gesture, so dragging never accidentally "activates" a planet.
+track.addEventListener('click', function(e){
+if (dragMoved){ e.preventDefault(); e.stopPropagation(); dragMoved = false; }
+}, true);
+
+track.addEventListener('touchstart', markUserInteracting, { passive:true });
+track.addEventListener('scroll', markUserInteracting, { passive:true });
+
+/* ---------- Active planet + auto-centering ---------- */
+function setActivePlanet(id, opts){
+opts = opts || {};
+if (id === activeId && !opts.force) return;
+activeId = id;
 planetLinks.forEach(function(a){
 a.classList.toggle('active', a.getAttribute('href') === '#' + id);
 });
+if (opts.recenter === false) return;
+if (userInteracting && !opts.force) return; // don't fight an in-progress manual scroll
+var el = track.querySelector('.solar-planet[href="#' + id + '"]');
+if (el){
+el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+}
 }
 
 var targets = planetLinks
@@ -2449,12 +2567,48 @@ if (winner) setActivePlanet(winner.id);
 targets.forEach(function(t){ io.observe(t); });
 } else {
 // No IntersectionObserver support: default to Home active, still fully usable via click.
-setActivePlanet('hero');
+setActivePlanet('hero', { force:true, recenter:false });
 }
 
+// Clicking a planet is the ONE deliberate action allowed to move the
+// page: it navigates, forces the active state immediately, and forces
+// re-centering even if a manual-interaction window is still open.
 planetLinks.forEach(function(a){
-a.addEventListener('click', function(){ setActivePlanet(a.getAttribute('href').slice(1)); });
+a.addEventListener('click', function(e){
+e.preventDefault();
+var id = a.getAttribute('href').slice(1);
+var target = document.getElementById(id);
+userInteracting = false;
+setActivePlanet(id, { force:true });
+if (target){ target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }
 });
+});
+
+/* ---------- Depth effect: distance-from-center, rAF-throttled ----------
+   Only geometry reads + one CSS-var write per planet per frame; the
+   actual visual smoothing (scale/opacity easing) is delegated to the
+   CSS transition on .solar-planet, not a manual JS lerp loop. */
+if (!reduceMotion){
+var rafPending = false;
+function updateDepth(){
+rafPending = false;
+var trackRect = track.getBoundingClientRect();
+var centerX = trackRect.left + trackRect.width / 2;
+var half = (trackRect.width / 2) || 1;
+planetLinks.forEach(function(a){
+var r = a.getBoundingClientRect();
+var pc = r.left + r.width / 2;
+var dist = Math.min(1, Math.abs(pc - centerX) / half);
+a.style.setProperty('--solar-dist', dist.toFixed(3));
+});
+}
+function requestDepthUpdate(){
+if (!rafPending){ rafPending = true; requestAnimationFrame(updateDepth); }
+}
+track.addEventListener('scroll', requestDepthUpdate, { passive:true });
+window.addEventListener('resize', requestDepthUpdate);
+requestDepthUpdate();
+}
 })();
 </script>
 </body>
