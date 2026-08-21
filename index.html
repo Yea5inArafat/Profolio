@@ -124,6 +124,13 @@ button{font-family:inherit; cursor:pointer;}
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
 outline:2px solid var(--ac); outline-offset:3px; border-radius:4px;
 }
+.skel{
+color:transparent !important; border-radius:6px; display:inline-block; min-width:44px;
+background:linear-gradient(90deg, var(--surface-2) 25%, var(--border) 37%, var(--surface-2) 63%);
+background-size:400% 100%; animation:skel-shimmer 1.4s ease infinite;
+}
+@keyframes skel-shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
+@media (prefers-reduced-motion: reduce){ .skel{animation:none; opacity:.5;} }
 .skip-link{
 position:fixed; top:-100px; left:12px; z-index:1200;
 background:var(--ac); color:#fff; font-family:var(--font-mono); font-size:13px; font-weight:700;
@@ -492,8 +499,7 @@ transition:opacity .5s ease, visibility .5s ease;
 #universe-loading .ul-bar{width:min(320px,80vw); height:3px; background:var(--surface-2); border-radius:99px; overflow:hidden;}
 #universe-loading .ul-bar-fill{height:100%; width:0%; background:var(--ac); transition:width .25s ease;}
 #universe-loading .ul-actions{display:flex; gap:12px; margin-top:6px;}
-#universe-loading .ul-actions button{opacity:0; pointer-events:none; transition:opacity .3s ease;}
-#universe-loading.ready .ul-actions button{opacity:1; pointer-events:auto;}
+#universe-loading .ul-actions button{opacity:1; pointer-events:auto;}
 #cmdk-overlay, #terminal-overlay{
 position:fixed; inset:0; z-index:970; background:rgba(6,9,17,.55); backdrop-filter:blur(4px);
 display:none; align-items:flex-start; justify-content:center; padding-top:14vh;
@@ -771,14 +777,13 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <div class="container nav-inner">
 <a href="#hero" class="brand">YEA5IN ARAFAT <span class="verdict">AC</span></a>
 <ul class="nav-links">
-<li><a href="#about">problem</a></li>
-<li><a href="#skills">tags</a></li>
-<li><a href="#projects">scoreboard</a></li>
-<li><a href="#github">repos</a></li>
-<li><a href="#cp">rating</a></li>
-<li><a href="#log">log</a></li>
-<li><a href="#resume">resume</a></li>
-<li><a href="#contact">submit</a></li>
+<li><a href="#projects">Projects</a></li>
+<li><a href="#skills">Skills</a></li>
+<li><a href="#cp">Competitive Programming</a></li>
+<li><a href="#about">About</a></li>
+<li><a href="#github">GitHub</a></li>
+<li><a href="#resume">Resume</a></li>
+<li><a href="#contact">Contact</a></li>
 </ul>
 <div class="nav-actions">
 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">◐</button>
@@ -859,15 +864,14 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <div id="solar-nav-spacer" aria-hidden="true"></div>
 
 <div id="mobile-menu">
-<a href="#hero">problem</a>
-<a href="#about">about</a>
-<a href="#skills">tags</a>
-<a href="#projects">scoreboard</a>
-<a href="#github">repos</a>
-<a href="#cp">rating</a>
-<a href="#log">log</a>
-<a href="#resume">resume</a>
-<a href="#contact">submit</a>
+<a href="#hero">Home</a>
+<a href="#projects">Projects</a>
+<a href="#skills">Skills</a>
+<a href="#cp">Competitive Programming</a>
+<a href="#about">About</a>
+<a href="#github">GitHub</a>
+<a href="#resume">Resume</a>
+<a href="#contact">Contact</a>
 </div>
 <section id="hero">
 <canvas id="hero-orb" aria-hidden="true"></canvas>
@@ -919,10 +923,10 @@ toward Codeforces Expert.
 <div class="feed-panel">
 <div class="feed-head"><span>Codeforces — live</span><span id="clock">--:--:--</span></div>
 <div class="stat-grid">
-<div class="stat-box"><div class="k">Max rating</div><div class="v" id="cf-max-rating-hero">Loading…</div></div>
-<div class="stat-box"><div class="k">Current rating</div><div class="v" id="cf-current-rating-hero">Loading…</div></div>
-<div class="stat-box"><div class="k">Rank</div><div class="v" id="cf-rank-hero" style="font-size:15px;">Loading…</div></div>
-<div class="stat-box"><div class="k">Contests</div><div class="v" id="cf-contests-hero">Loading…</div></div>
+<div class="stat-box"><div class="k">Max rating</div><div class="v skel" id="cf-max-rating-hero">Loading…</div></div>
+<div class="stat-box"><div class="k">Current rating</div><div class="v skel" id="cf-current-rating-hero">Loading…</div></div>
+<div class="stat-box"><div class="k">Rank</div><div class="v skel" id="cf-rank-hero" style="font-size:15px;">Loading…</div></div>
+<div class="stat-box"><div class="k">Contests</div><div class="v skel" id="cf-contests-hero">Loading…</div></div>
 </div>
 <p id="cf-live-note-hero" style="margin-top:12px; color:var(--ink-dim); font-size:11px;">Loading live stats from Codeforces…</p>
 </div>
@@ -1084,7 +1088,7 @@ toward Codeforces Expert.
 <h2 class="section-title">GitHub, live</h2>
 <p class="section-sub">Pulled directly from the GitHub API for <a href="https://github.com/Yea5inArafat" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ac); font-weight:600;">github.com/Yea5inArafat ↗</a> — nothing here is invented; if the API is unavailable this section says so.</p>
 </div>
-<div id="gh-status" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim);">Loading repositories…</div>
+<div id="gh-status" class="skel" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim); min-width:160px;">Loading repositories…</div>
 <div class="gh-grid" id="gh-grid"></div>
 </div>
 </section>
@@ -1098,12 +1102,12 @@ toward Codeforces Expert.
 <div class="cp-grid">
 <div class="cp-rating-card">
 <div class="platform">Codeforces — max rating</div>
-<div class="rating" id="cf-max-rating">—</div>
-<div class="rank" id="cf-rank" style="color:var(--ink-dim); background:var(--surface-2);">Loading…</div>
+<div class="rating skel" id="cf-max-rating">—</div>
+<div class="rank skel" id="cf-rank" style="color:var(--ink-dim); background:var(--surface-2);">Loading…</div>
 <div class="cp-mini">
-<div><b id="cf-current-rating">—</b>current rating</div>
-<div><b id="cf-solved">—</b>solved</div>
-<div><b id="cf-contests">—</b>contests</div>
+<div><b class="skel" id="cf-current-rating">—</b>current rating</div>
+<div><b class="skel" id="cf-solved">—</b>solved</div>
+<div><b class="skel" id="cf-contests">—</b>contests</div>
 <div><b>14</b>topics practiced</div>
 </div>
 <p id="cf-live-note" style="margin-top:14px; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim);">Loading live stats from Codeforces…</p>
@@ -1186,9 +1190,10 @@ toward Codeforces Expert.
 <div class="container">
 <div class="section-head">
 <div class="case-label"><span class="id">case_007</span> / submit.form</div>
-<h2 class="section-title">Let's Connect</h2>
-<p class="section-sub">If you want to discuss a project, collaboration, programming, technology or an opportunity, feel free to reach out.</p>
+<h2 class="section-title">Let's build something.</h2>
+<p class="section-sub">Have an idea, a project, or simply want to connect? I'd be happy to hear from you.</p>
 </div>
+<a href="mailto:yea5inar4fat@gmail.com" class="btn btn-primary" style="margin-bottom:28px;">Email me</a>
 <div class="contact-grid">
 <div>
 <div class="contact-info-item">
@@ -1489,19 +1494,19 @@ const titleCase = s => s ? s.replace(/\b\w/g, c => c.toUpperCase()) : 'Unrated';
 
 function setText(id, val){
 const el = document.getElementById(id);
-if (el && val !== null && val !== undefined) el.textContent = val;
+if (el && val !== null && val !== undefined){ el.textContent = val; el.classList.remove('skel'); }
 }
 function stamp(){
 return new Date().toLocaleTimeString('en-GB');
 }
 function showError(){
-const msg = 'Codeforces data unavailable right now';
+const msg = 'Codeforces stats temporarily unavailable';
 setText('cf-live-note', msg + ' · codeforces.com/profile/' + HANDLE);
 setText('cf-live-note-hero', msg);
 ['cf-max-rating-hero','cf-current-rating-hero','cf-rank-hero','cf-contests-hero',
 'cf-max-rating','cf-current-rating','cf-solved','cf-contests','cf-rank'].forEach(id => {
 const el = document.getElementById(id);
-if (el && (el.textContent === 'Loading…' || el.textContent === '—')) el.textContent = 'Unavailable';
+if (el && (el.textContent === 'Loading…' || el.textContent === '—')){ el.textContent = 'Unavailable'; el.classList.remove('skel'); }
 });
 }
 
@@ -1550,9 +1555,9 @@ setText('cf-current-rating-hero', curRating ?? 'Unrated');
 
 if (maxRank){
 const heroRank = document.getElementById('cf-rank-hero');
-if (heroRank){ heroRank.textContent = maxRank; heroRank.style.color = color; }
+if (heroRank){ heroRank.textContent = maxRank; heroRank.style.color = color; heroRank.classList.remove('skel'); }
 const cfRank = document.getElementById('cf-rank');
-if (cfRank){ cfRank.textContent = maxRank; cfRank.style.color = color; cfRank.style.background = 'var(--surface-2)'; }
+if (cfRank){ cfRank.textContent = maxRank; cfRank.style.color = color; cfRank.style.background = 'var(--surface-2)'; cfRank.classList.remove('skel'); }
 } else {
 setText('cf-rank-hero', 'Unrated');
 setText('cf-rank', 'Unrated');
@@ -1625,6 +1630,7 @@ if (!r.ok) throw new Error('http-' + r.status);
 return r.json();
 })
 .then(repos => {
+statusEl.classList.remove('skel');
 if (!Array.isArray(repos) || repos.length === 0){
 statusEl.textContent = 'No public repositories returned by the GitHub API right now.';
 return;
@@ -1649,21 +1655,23 @@ ${lang ? `<span><span class="dot" style="display:inline-block;width:8px;height:8
 }).join('');
 })
 .catch(err => {
+statusEl.classList.remove('skel');
 const msg = err && err.message === 'rate-limited'
 ? 'GitHub API rate limit reached — try again in a few minutes, or view the profile directly.'
-: 'GitHub data unavailable right now — view the profile directly.';
+: 'GitHub stats temporarily unavailable — view the profile directly.';
 statusEl.innerHTML = `${msg} <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
 const retryBtn = document.getElementById('gh-retry-btn');
-if (retryBtn) retryBtn.addEventListener('click', () => { statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
+if (retryBtn) retryBtn.addEventListener('click', () => { statusEl.classList.add('skel'); statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
 });
 
 // Safety net: force an honest "unavailable" state after 10s if the
 // request never resolves either way, instead of an endless spinner state.
 setTimeout(() => {
 if (statusEl.textContent === 'Loading repositories…'){
+statusEl.classList.remove('skel');
 statusEl.innerHTML = `GitHub data is taking too long to load — view the profile directly. <a href="https://github.com/${USER}" target="_blank" rel="noopener noreferrer" style="color:var(--ac);">github.com/${USER} ↗</a> · <button type="button" id="gh-retry-btn2" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>`;
 const retryBtn2 = document.getElementById('gh-retry-btn2');
-if (retryBtn2) retryBtn2.addEventListener('click', () => { statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
+if (retryBtn2) retryBtn2.addEventListener('click', () => { statusEl.classList.add('skel'); statusEl.textContent = 'Loading repositories…'; loadGitHubRepos(); });
 }
 }, 10000);
 })();
