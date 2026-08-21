@@ -443,6 +443,7 @@ white-space:nowrap; opacity:0; transition:opacity .3s ease, transform .2s ease, 
 }
 .planet-label.visible{opacity:.92; pointer-events:auto;}
 .planet-label:hover{border-color:var(--ac); transform:translate(-50%,-50%) scale(1.06);}
+.planet-label:focus-visible{outline:2px solid var(--ac); outline-offset:3px; border-color:var(--ac);}
 .planet-label .dot{display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:7px; vertical-align:middle;}
 #universe-topbar{
 position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:920; pointer-events:auto;
@@ -532,7 +533,7 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 <div class="ul-bar"><div class="ul-bar-fill" id="ul-bar-fill"></div></div>
 <div class="ul-steps">
 <div class="ul-step" id="ul-step-scene"><span>Identity core</span><span>—</span></div>
-<div class="ul-step" id="ul-step-planets"><span>Orbiting worlds</span><span>—</span></div>
+<div class="ul-step" id="ul-step-planets"><span>Navigation rail</span><span>—</span></div>
 <div class="ul-step" id="ul-step-field"><span>Star field</span><span>—</span></div>
 <div class="ul-step" id="ul-step-data"><span>Live data links</span><span>—</span></div>
 </div>
@@ -1547,17 +1548,23 @@ enterClassicMode();
 return;
 }
 
-/* ---------- Sections → planets (real anchors only) ---------- */
+/* ---------- Sections → planets, in one fixed left-to-right order ----------
+   This is a LINEAR navigation rail: every planet's X position below is its
+   permanent slot (index+1)*RAIL_SPACING. Nothing here ever moves a planet
+   off that line — "orbit" motion is now just gentle self-spin + bob, not
+   position. Depth/scale for perspective is computed per-frame in animate(). */
 const SECTIONS = [
-{ id:'about',    label:'ABOUT',       color:0x12A454, radius:150, speed:0.09,  incline:0.10 },
-{ id:'skills',   label:'SKILLS',      color:0x2F6FE4, radius:200, speed:0.065, incline:0.35 },
-{ id:'projects', label:'PROJECTS',    color:0xC98A1A, radius:250, speed:0.05,  incline:-0.2 },
-{ id:'github',   label:'GITHUB',      color:0x9AA8BC, radius:300, speed:0.04,  incline:0.5  },
-{ id:'cp',       label:'CODEFORCES',  color:0x8A44D8, radius:230, speed:0.055, incline:-0.4 },
-{ id:'education',label:'EDUCATION',   color:0x0FA3A3, radius:280, speed:0.045, incline:0.2  },
-{ id:'resume',   label:'RESUME',      color:0xE8ECF3, radius:335, speed:0.032, incline:-0.15},
-{ id:'contact',  label:'CONTACT',     color:0xD6483F, radius:190, speed:0.07,  incline:0.6  }
+{ id:'about',    label:'ME',          color:0x12A454 },
+{ id:'skills',   label:'STACK',       color:0x2F6FE4 },
+{ id:'projects', label:'WORK',        color:0xC98A1A },
+{ id:'github',   label:'GITHUB',      color:0x9AA8BC },
+{ id:'cp',       label:'CODEFORCES',  color:0x8A44D8 },
+{ id:'education',label:'EDUCATION',   color:0x0FA3A3 },
+{ id:'resume',   label:'RESUME',      color:0xE8ECF3 },
+{ id:'contact',  label:'CONTACT',     color:0xD6483F }
 ];
+const RAIL_SPACING = 130;      // world units between adjacent slots
+const railX = (i) => (i + 1) * RAIL_SPACING; // i = -1 → 0 (the sun/identity core)
 
 /* ---------- Quality tiers ---------- */
 let quality = isSmall ? 'low' : (cores <= 4 ? 'medium' : 'high');
@@ -1576,29 +1583,40 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 4000);
-const OVERVIEW_POS = new THREE.Vector3(0, 90, 620);
-const OVERVIEW_LOOK = new THREE.Vector3(0, 0, 0);
-camera.position.copy(OVERVIEW_POS);
-camera.lookAt(OVERVIEW_LOOK);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 4000);
+// Camera is fixed — a "2D space" viewport looking straight down the rail.
+// Focus changes move the RAIL, never the camera, so the navigation always
+// reads as a flat, predictable left-to-right line rather than free flight.
+const CAM_POS = new THREE.Vector3(0, 42, 300);
+const CAM_LOOK_Y = 14;
+camera.position.copy(CAM_POS);
+camera.lookAt(0, CAM_LOOK_Y, 0);
 
-scene.add(new THREE.AmbientLight(0x6677aa, 0.55));
+scene.add(new THREE.AmbientLight(0x6677aa, 0.6));
 const coreLight = new THREE.PointLight(0xffffff, 1.6, 1400, 1.6);
-coreLight.position.set(0, 0, 0);
+coreLight.position.set(0, 60, 200);
 scene.add(coreLight);
 
-// Identity core — the same wireframe language as the hero kernel, scaled up.
+// Everything that represents a nav slot (sun + planets) lives in one group
+// so "centering the focused planet" is a single group translation, not a
+// camera orbit. This is the entire "2D space + 3D objects" trick.
+const railGroup = new THREE.Group();
+scene.add(railGroup);
+
+// Identity core ("Arafat") — the same wireframe language as the hero kernel,
+// scaled up, sitting in slot 0 as the first stop on the rail.
 const coreGroup = new THREE.Group();
+coreGroup.position.set(railX(-1), 0, 0);
 const coreOuter = new THREE.Mesh(
-new THREE.IcosahedronGeometry(46, 1),
+new THREE.IcosahedronGeometry(40, 1),
 new THREE.MeshBasicMaterial({ color: 0x12A454, wireframe: true, transparent: true, opacity: 0.6 })
 );
 const coreInner = new THREE.Mesh(
-new THREE.IcosahedronGeometry(28, 0),
+new THREE.IcosahedronGeometry(24, 0),
 new THREE.MeshStandardMaterial({ color: 0x0B1420, emissive: 0x12A454, emissiveIntensity: 0.5, wireframe: false, roughness: 0.4 })
 );
 coreGroup.add(coreOuter, coreInner);
-scene.add(coreGroup);
+railGroup.add(coreGroup);
 
 function makeGlowTexture(hex){
 const size = 128;
@@ -1617,14 +1635,28 @@ return new THREE.CanvasTexture(cnv);
 }
 
 const planetGroup = new THREE.Group();
-scene.add(planetGroup);
+railGroup.add(planetGroup);
 const glowSprites = [];
 const planetMeshes = [];
 
-SECTIONS.forEach((s) => {
+// The rail line — a single straight thread connecting every stop, so the
+// eye reads "one horizontal path" before it reads "planets".
+{
+const pts = [new THREE.Vector3(railX(-1), 0, 0)];
+SECTIONS.forEach((s, i) => pts.push(new THREE.Vector3(railX(i), 0, 0)));
+const railLine = new THREE.Line(
+new THREE.BufferGeometry().setFromPoints(pts),
+new THREE.LineBasicMaterial({ color: 0x2F6FE4, transparent: true, opacity: 0.28 })
+);
+planetGroup.add(railLine);
+}
+
+SECTIONS.forEach((s, i) => {
+// "orbit" is now just this planet's fixed mount point on the rail — its
+// position.x never changes. Self-spin/bob/scale are applied per-frame in
+// animate(), never a position on the line itself.
 const orbit = new THREE.Object3D();
-orbit.rotation.z = s.incline;
-orbit.userData.angle = Math.random() * Math.PI * 2;
+orbit.position.set(railX(i), 0, 0);
 planetGroup.add(orbit);
 
 const mesh = new THREE.Mesh(
@@ -1632,9 +1664,17 @@ new THREE.SphereGeometry(quality === 'low' ? 9 : 11, quality === 'low' ? 12 : 22
 new THREE.MeshStandardMaterial({ color: s.color, emissive: s.color, emissiveIntensity: 0.35, roughness: 0.5, metalness: 0.1 })
 );
 mesh.userData.section = s;
-mesh.position.set(s.radius, 0, 0);
 orbit.add(mesh);
 planetMeshes.push(mesh);
+
+// Subtle decorative ring — depth and personality, not a position.
+const ring = new THREE.Mesh(
+new THREE.RingGeometry(15, 17.5, quality === 'low' ? 20 : 40),
+new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.22, side: THREE.DoubleSide })
+);
+ring.rotation.x = Math.PI * 0.42;
+ring.rotation.z = (i % 2 === 0 ? 1 : -1) * 0.15;
+mesh.add(ring);
 
 const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(s.color), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
 glow.scale.set(46, 46, 1);
@@ -1643,15 +1683,28 @@ glowSprites.push(glow);
 
 s.orbit = orbit;
 s.mesh = mesh;
+s.ring = ring;
+s.glowSprite = glow;
+s.index = i; // fixed slot number, used for focus-distance math
 });
 
-/* ---------- HUD labels (billboarded via 2D projection) ---------- */
+/* ---------- HUD labels (billboarded via 2D projection) ----------
+   Each label is a real nav control: role="button", labeled section name,
+   Enter/Space activates it same as a click. tabIndex is toggled with
+   visibility in updateLabels() below so hidden labels never sit in the
+   tab order — only the labels actually on screen are reachable. */
 const hud = document.getElementById('universe-hud');
 SECTIONS.forEach((s) => {
 const el = document.createElement('div');
 el.className = 'planet-label';
+el.setAttribute('role', 'button');
+el.setAttribute('aria-label', 'Go to ' + s.label + ' section');
+el.tabIndex = -1;
 el.innerHTML = `<span class="dot" style="background:#${s.color.toString(16).padStart(6,'0')}"></span>${s.label}`;
 el.addEventListener('click', () => enterPlanet(s.id));
+el.addEventListener('keydown', (e) => {
+if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); enterPlanet(s.id); }
+});
 hud.appendChild(el);
 s.labelEl = el;
 });
@@ -1673,6 +1726,12 @@ const proj = world.clone().project(camera);
 const onScreen = proj.x > -1.1 && proj.x < 1.1 && proj.y > -1.1 && proj.y < 1.1;
 const visible = nearHero && inFront && onScreen;
 s.labelEl.classList.toggle('visible', visible);
+// Keep tab order logical: a label the user can't see is never a stop.
+if (visible !== s.labelEl.dataset.wasVisible){
+s.labelEl.tabIndex = visible ? 0 : -1;
+s.labelEl.setAttribute('aria-hidden', visible ? 'false' : 'true');
+s.labelEl.dataset.wasVisible = visible;
+}
 if (visible){
 s.labelEl.style.left = ((proj.x * 0.5 + 0.5) * window.innerWidth) + 'px';
 s.labelEl.style.top = ((-proj.y * 0.5 + 0.5) * window.innerHeight - 26) + 'px';
@@ -1692,43 +1751,46 @@ target.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 }
 
 canvas.addEventListener('mousemove', (e) => {
-if (landed || isTouch) return;
+if (isTouch) return;
 setPointerFromEvent(e, pointerNDC);
 });
 canvas.addEventListener('click', (e) => {
-if (landed) return;
+if (dragMoved) return; // a drag-release already handled navigation
 setPointerFromEvent(e, pointerNDC);
 raycaster.setFromCamera(pointerNDC, camera);
 const hit = raycaster.intersectObjects(planetMeshes)[0];
 if (hit) enterPlanet(hit.object.userData.section.id);
 });
 canvas.addEventListener('touchend', (e) => {
-if (landed || !e.changedTouches || !e.changedTouches[0]) return;
+if (dragMoved || !e.changedTouches || !e.changedTouches[0]) return;
 setPointerFromEvent(e.changedTouches[0], pointerNDC);
 raycaster.setFromCamera(pointerNDC, camera);
 const hit = raycaster.intersectObjects(planetMeshes)[0];
 if (hit) enterPlanet(hit.object.userData.section.id);
 }, { passive: true });
 
-/* ---------- Touch drag to orbit the overview camera ---------- */
-let dragging = false, lastX = 0, lastY = 0, yaw = 0, pitch = 0.14;
-function applyOrbitPosition(){
-// Only called from an actual drag move, never per-frame — so it can never
-// fight with WASD free-fly, which just adds deltas straight to the camera.
-const dist = OVERVIEW_POS.length();
-camera.position.x = Math.sin(yaw) * dist * Math.cos(pitch);
-camera.position.z = Math.cos(yaw) * dist * Math.cos(pitch);
-camera.position.y = OVERVIEW_POS.y + Math.sin(pitch) * dist * 0.3;
-}
-function onDragStart(x, y){ if (landed) return; dragging = true; lastX = x; lastY = y; }
+/* ---------- Drag / swipe the rail horizontally (mouse + touch) ----------
+   This is a carousel drag, not a camera orbit: it only ever changes railX,
+   the single number that decides which planet is centered. Releasing snaps
+   to the nearest slot, same as a horizontal carousel. */
+let dragging = false, dragMoved = false, lastX = 0, lastY = 0;
+function onDragStart(x, y){ dragging = true; dragMoved = false; lastX = x; lastY = y; }
 function onDragMove(x, y){
-if (!dragging || landed) return;
-yaw += (x - lastX) * 0.004;
-pitch = Math.max(-0.5, Math.min(0.5, pitch + (y - lastY) * 0.003));
+if (!dragging) return;
+const dx = x - lastX, dy = y - lastY;
+if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+currentX -= dx * 1.15; // drag left → reveal planets to the right, carousel-style
 lastX = x; lastY = y;
-applyOrbitPosition();
 }
-function onDragEnd(){ dragging = false; }
+function onDragEnd(){
+if (!dragging) return;
+dragging = false;
+if (dragMoved){
+// Snap to whichever slot the rail ended up nearest to.
+const nearestIdx = Math.max(-1, Math.min(SECTIONS.length - 1, Math.round(currentX / RAIL_SPACING) - 1));
+setFocus(nearestIdx, { scroll: true });
+}
+}
 canvas.addEventListener('mousedown', (e) => onDragStart(e.clientX, e.clientY));
 window.addEventListener('mousemove', (e) => onDragMove(e.clientX, e.clientY));
 window.addEventListener('mouseup', onDragEnd);
@@ -1736,58 +1798,85 @@ canvas.addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) on
 canvas.addEventListener('touchmove', (e) => { const t = e.touches[0]; if (t) onDragMove(t.clientX, t.clientY); }, { passive: true });
 canvas.addEventListener('touchend', onDragEnd, { passive: true });
 
-/* ---------- WASD free-fly (desktop overview only) ---------- */
-const keys = Object.create(null);
+// Trackpad horizontal-swipe support: only reacts to the horizontal wheel
+// component, so an ordinary vertical mouse wheel is left completely alone
+// and normal page scrolling is never hijacked.
+canvas.addEventListener('wheel', (e) => {
+if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+currentX += e.deltaX * 0.6;
+const nearestIdx = Math.max(-1, Math.min(SECTIONS.length - 1, Math.round(currentX / RAIL_SPACING) - 1));
+if (nearestIdx !== targetFocusIndex) setFocus(nearestIdx, { scroll: true });
+}, { passive: true });
+
+/* ---------- Left / Right keys step through the rail one slot at a time ---------- */
 window.addEventListener('keydown', (e) => {
 const tag = (document.activeElement && document.activeElement.tagName) || '';
 if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-keys[e.key.toLowerCase()] = true;
-});
-window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
-
-/* ---------- Camera flight state machine ---------- */
-let landed = false;
-let flight = null; // { from, to, fromLook, toLook, t0, dur, onDone }
-
-function easeInOutCubic(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
-
-function flyTo(pos, look, dur, onDone){
-flight = { from: camera.position.clone(), to: pos.clone(), fromLook: currentLook.clone(), toLook: look.clone(), t0: performance.now(), dur, onDone };
+if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd'){
+setFocus(Math.min(SECTIONS.length - 1, targetFocusIndex + 1), { scroll: true });
+} else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a'){
+setFocus(Math.max(-1, targetFocusIndex - 1), { scroll: true });
 }
-const currentLook = OVERVIEW_LOOK.clone();
+});
+
+/* ---------- Rail focus state ----------
+   One number drives everything: targetFocusIndex (-1 = the sun/"Arafat"
+   slot, 0..N-1 = a planet). currentX eases toward railX(targetFocusIndex)
+   every frame in animate(); the camera itself never moves, so this can
+   never turn into free-roam 3D navigation. */
+let targetFocusIndex = -1;
+let currentX = railX(-1);
+let landed = false; // true whenever a real section (not the sun/hero) is focused
+let scrollTimer = null;
+
+function setFocus(index, opts){
+index = Math.max(-1, Math.min(SECTIONS.length - 1, index));
+targetFocusIndex = index;
+landed = index >= 0;
+document.getElementById('universe-stage').classList.toggle('landed', landed);
+document.getElementById('return-universe-btn').style.display = landed ? 'inline-flex' : 'none';
+canvas.style.opacity = landed ? '0.32' : '1';
+const hashId = index === -1 ? 'hero' : SECTIONS[index].id;
+history.replaceState(null, '', '#' + hashId);
+if (opts && opts.scroll){
+closeOverlays();
+clearTimeout(scrollTimer);
+// Give the rail a beat to start easing before the page jumps, so the
+// planet visibly slides toward center rather than teleporting.
+scrollTimer = setTimeout(() => {
+const target = index === -1 ? document.getElementById('hero') : document.getElementById(hashId);
+if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 90);
+}
+}
 
 function enterPlanet(id){
-const s = SECTIONS.find(x => x.id === id);
-if (!s) return;
-closeOverlays();
-landed = true;
-document.getElementById('universe-stage').classList.add('landed');
-document.getElementById('return-universe-btn').style.display = 'inline-flex';
-canvas.style.opacity = '0.28';
-
-const worldPos = new THREE.Vector3();
-s.mesh.getWorldPosition(worldPos);
-const dir = worldPos.clone().normalize();
-const camPos = worldPos.clone().add(dir.multiplyScalar(60)).add(new THREE.Vector3(0, 14, 0));
-flyTo(camPos, worldPos, reduceMotion ? 1 : 1100, () => {
-const target = document.getElementById(id);
-if (target) target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-});
-history.replaceState(null, '', '#' + id);
+const idx = SECTIONS.findIndex(s => s.id === id);
+if (idx === -1) return;
+setFocus(idx, { scroll: true });
 }
-
-function returnToUniverse(){
-if (!landed) return;
-landed = false;
-document.getElementById('universe-stage').classList.remove('landed');
-document.getElementById('return-universe-btn').style.display = 'none';
-canvas.style.opacity = '1';
-window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-flyTo(OVERVIEW_POS, OVERVIEW_LOOK, reduceMotion ? 1 : 900);
-history.replaceState(null, '', '#hero');
-}
+function returnToUniverse(){ setFocus(-1, { scroll: true }); }
 window.__universeReturn = returnToUniverse;
 window.__universeEnter = enterPlanet;
+
+/* ---------- Keep the rail synced to normal vertical page scroll ----------
+   Scrolling the real page (no click needed) brings the matching planet to
+   center on its own — this is the "two dimensions, one intuitive model"
+   the layout is built around. Never triggers scrollIntoView itself, so it
+   can't fight with a user-initiated scroll. */
+const scrollSyncTargets = [{ id: 'hero', index: -1 }, ...SECTIONS.map((s, i) => ({ id: s.id, index: i }))]
+.map(t => ({ ...t, el: document.getElementById(t.id) }))
+.filter(t => t.el);
+if ('IntersectionObserver' in window){
+const io = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (!entry.isIntersecting) return;
+const match = scrollSyncTargets.find(t => t.el === entry.target);
+if (match && match.index !== targetFocusIndex) setFocus(match.index, { scroll: false });
+});
+}, { threshold: 0, rootMargin: '-45% 0px -45% 0px' });
+scrollSyncTargets.forEach(t => io.observe(t.el));
+}
 
 document.getElementById('return-universe-btn').addEventListener('click', returnToUniverse);
 
@@ -1978,28 +2067,36 @@ if (running){
 coreGroup.rotation.y += 0.0016;
 coreGroup.rotation.x += 0.0006;
 
-SECTIONS.forEach(s => { s.orbit.userData.angle += s.speed * 0.01; s.orbit.rotation.y = s.orbit.userData.angle; });
-
-if (flight){
-const t = Math.min(1, (now - flight.t0) / flight.dur);
-const e = easeInOutCubic(t);
-camera.position.lerpVectors(flight.from, flight.to, e);
-currentLook.lerpVectors(flight.fromLook, flight.toLook, e);
-camera.lookAt(currentLook);
-if (t >= 1){ const done = flight.onDone; flight = null; if (done) done(); }
-} else if (!landed){
-// Orbit position is only set from actual drag events (see applyOrbitPosition);
-// WASD just adds a persistent delta on top, so the two never fight.
-if (!isTouch){
-const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
-const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
-const speed = 2.2;
-if (keys['w']) camera.position.addScaledVector(fwd, speed);
-if (keys['s']) camera.position.addScaledVector(fwd, -speed);
-if (keys['a']) camera.position.addScaledVector(right, -speed);
-if (keys['d']) camera.position.addScaledVector(right, speed);
+// The ONLY camera motion in this scene: the whole rail eases toward the
+// focused slot, sliding left/right under a fixed camera. No orbiting,
+// no free-fly — position on screen always maps 1:1 to position on the line.
+if (!dragging){
+currentX += (railX(targetFocusIndex) - currentX) * 0.085;
 }
-camera.lookAt(currentLook.set(0, 0, 0));
+railGroup.position.x = -currentX;
+
+// Perspective-without-scattering: distance from the focused slot (in rail
+// units, not 3D space) drives scale/glow/depth falloff. Everything still
+// sits on the same straight X line — only how prominent it looks changes.
+const bob = now * 0.0011;
+SECTIONS.forEach((s, i) => {
+const dist = Math.abs(railX(i) - currentX) / RAIL_SPACING;
+const t = Math.min(1, dist / 2.4);
+const scale = 1.32 - t * 0.62;
+s.mesh.scale.setScalar(scale);
+s.mesh.material.emissiveIntensity = 0.75 - t * 0.5;
+s.glowSprite.material.opacity = 0.85 - t * 0.65;
+s.ring.material.opacity = 0.28 - t * 0.18;
+s.orbit.position.y = Math.sin(bob + i) * 2.4;
+s.orbit.position.z = -t * 34; // recede softly into depth, never off the line
+s.mesh.rotation.y += 0.0035;
+});
+{
+const distSun = Math.abs(railX(-1) - currentX) / RAIL_SPACING;
+const tSun = Math.min(1, distSun / 2.4);
+const scaleSun = 1.15 - tSun * 0.4;
+coreGroup.scale.setScalar(scaleSun);
+coreGroup.position.y = Math.sin(bob - 1) * 2.4;
 }
 
 // Render first so camera.matrixWorldInverse is current for this frame's
