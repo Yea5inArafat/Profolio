@@ -285,10 +285,10 @@ display:flex; align-items:center; justify-content:center; border:1px solid var(-
 .quick-facts{list-style:none; font-size:13.5px;}
 .quick-facts li{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); color:var(--ink-muted); font-family:var(--font-mono); font-size:12.5px;}
 .quick-facts li b{color:var(--ink); font-weight:600; font-family:var(--font-body);}
-.counter-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
-.counter-box{text-align:center; padding:18px 8px; border:1px solid var(--border); border-radius:10px; background:var(--surface);}
-.counter-box .num{font-family:var(--font-mono); font-size:24px; font-weight:700; color:var(--ac);}
-.counter-box .lbl{font-size:11px; color:var(--ink-muted); margin-top:4px;}
+.focus-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.focus-box{padding:16px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface);}
+.focus-box .focus-h{font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--ac); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+.focus-box .focus-b{font-size:12.5px; color:var(--ink-muted); line-height:1.5;}
 .rating-legend{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:28px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);}
 .rating-legend .lg{display:flex; align-items:center; gap:6px;}
 .rating-legend .sw{width:10px; height:10px; border-radius:50%;}
@@ -399,8 +399,14 @@ transition:color .2s ease, border-color .2s ease;
 }
 .footer-links a:hover{color:var(--ac); border-color:var(--ac);}
 .footer-links a svg{width:16px; height:16px; fill:currentColor;}
-.footer-bottom{border-top:1px solid var(--border); padding-top:18px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; text-align:center;}
+.footer-bottom{border-top:1px solid var(--border); padding-top:18px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; text-align:center; align-items:center;}
 @media (max-width:560px){.footer-bottom{justify-content:center; text-align:center;}}
+#visitor-badge{
+display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11.5px;
+color:var(--ink-dim); padding:5px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface);
+}
+#visitor-badge .eye{opacity:.8;}
+#visitor-badge #visitor-count{color:var(--ac); font-weight:700;}
 #back-to-top{
 position:fixed; right:22px; bottom:22px; width:44px; height:44px; border-radius:50%;
 background:var(--ac); color:#fff; border:none; display:flex; align-items:center; justify-content:center;
@@ -422,7 +428,7 @@ transition:opacity .25s ease, transform .25s ease, background .2s ease;
 .contact-grid{grid-template-columns:1fr;}
 .nav-links{display:none;}
 .mobile-menu-btn{display:flex;}
-.counter-grid{grid-template-columns:repeat(2,1fr);}
+.focus-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media (max-width:560px){
 .form-row{grid-template-columns:1fr;}
@@ -519,6 +525,151 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 #universe-canvas{display:none;}
 .planet-label{position:static; opacity:1; display:inline-flex; margin:4px;}
 }
+
+/* =====================================================================
+   NEW FEATURE — Linear 3D Solar-System top navigation.
+   Purely additive: new selectors only, nothing above this touches or
+   overrides existing #navbar / .nav-links / #universe-topbar rules.
+   Sits directly under the existing #navbar as its own thin bar; a
+   spacer element (#solar-nav-spacer) reserves its height in normal
+   flow so no existing section, layout or scroll-anchor is affected.
+
+   v2 upgrade (size + curved wrap + subtle rotation) — see inline notes
+   below for what changed and why. Planet order/emoji/labels/hrefs live
+   only in the HTML; nothing here hardcodes an order.
+   ===================================================================== */
+#solar-nav{
+position:fixed; top:68px; left:0; right:0; z-index:890;
+height:66px; display:flex; align-items:stretch;
+background:rgba(238,241,245,.86); backdrop-filter:blur(10px) saturate(140%); -webkit-backdrop-filter:blur(10px) saturate(140%);
+border-bottom:1px solid var(--border);
+}
+html[data-theme="dark"] #solar-nav{ background:rgba(11,17,28,.86); }
+#solar-nav-spacer{ height:66px; }
+#solar-nav-fixed{
+flex:0 0 auto; display:flex; align-items:center; gap:6px;
+padding:0 14px; position:relative; z-index:3; background:inherit;
+}
+#solar-nav-fixed::after{
+content:""; position:absolute; top:10px; bottom:10px; right:0; width:1px; background:var(--border);
+}
+.solar-ctrl-btn{
+display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);
+background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 12px;
+transition:color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.solar-ctrl-btn:hover{color:var(--ac); border-color:var(--ac);}
+.solar-ctrl-btn:active{transform:scale(.96);}
+#solar-nav-track{
+flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:36px;
+padding:0 26px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
+perspective:800px; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+position:relative; z-index:1;
+}
+#solar-nav-track::-webkit-scrollbar{height:4px;}
+#solar-nav-track::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+.solar-planet{
+flex:0 0 auto; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
+padding:6px 4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.02em; color:var(--ink-dim);
+transform-style:preserve-3d; transition:transform .25s cubic-bezier(.16,.8,.24,1), color .2s ease;
+/* Curved/wave orbital wrap: each planet carries a small, fixed vertical
+   offset (below) so the linear row reads as a gentle orbital arc once
+   the container is too narrow to lay everything flat — DOM/tab/click
+   order never changes, only the y-position of each item. Disabled by
+   default (0px) and only switched on at the narrower breakpoints. */
+transform:translateY(var(--solar-wave, 0px));
+}
+.solar-orbit-ring{
+position:absolute; top:50%; left:50%; width:42px; height:42px; margin:-21px 0 0 -21px;
+border:1px solid var(--border); border-radius:50%; opacity:.55;
+transform:rotateX(58deg); transition:border-color .25s ease, opacity .25s ease, width .25s ease, height .25s ease, margin .25s ease;
+pointer-events:none;
+animation:solarRingSpin 16s linear infinite;
+}
+.solar-emoji{
+font-size:21px; line-height:1; display:inline-block;
+filter:drop-shadow(0 0 0 transparent); transition:filter .25s ease, transform .25s ease;
+transform:translateZ(8px);
+animation:solarPlanetBob 5.5s ease-in-out infinite;
+}
+/* Slight per-planet phase offset so the whole row doesn't bob in unison
+   — reads as independent orbits rather than one bouncing strip. */
+.solar-planet:nth-child(2) .solar-emoji{ animation-delay:-.6s; }
+.solar-planet:nth-child(3) .solar-emoji{ animation-delay:-1.2s; }
+.solar-planet:nth-child(4) .solar-emoji{ animation-delay:-1.8s; }
+.solar-planet:nth-child(5) .solar-emoji{ animation-delay:-2.4s; }
+.solar-planet:nth-child(6) .solar-emoji{ animation-delay:-3.0s; }
+.solar-planet:nth-child(7) .solar-emoji{ animation-delay:-3.6s; }
+.solar-planet:nth-child(8) .solar-emoji{ animation-delay:-4.2s; }
+@keyframes solarRingSpin{ from{ transform:rotateX(58deg) rotate(0deg); } to{ transform:rotateX(58deg) rotate(360deg); } }
+@keyframes solarPlanetBob{ 0%,100%{ transform:translateZ(8px) translateY(0); } 50%{ transform:translateZ(8px) translateY(-2.5px); } }
+.solar-text{ transition:color .2s ease; }
+.solar-planet:hover{ color:var(--ink); transform:translateY(calc(var(--solar-wave, 0px) - 2px)) rotateX(6deg) scale(1.08); }
+.solar-planet:hover .solar-orbit-ring{ border-color:var(--ac); opacity:.85; animation-play-state:paused; }
+.solar-planet:hover .solar-emoji{ filter:drop-shadow(0 0 6px var(--glow-ac)); animation-play-state:paused; }
+.solar-planet:focus-visible{ outline:2px solid var(--ac); outline-offset:4px; border-radius:8px; }
+.solar-planet:focus-visible .solar-orbit-ring,
+.solar-planet:focus-visible .solar-emoji{ animation-play-state:paused; }
+.solar-planet.active{ color:var(--ac); transform:translateY(calc(var(--solar-wave, 0px) - 2px)) scale(1.18); }
+.solar-planet.active .solar-orbit-ring{
+border-color:var(--ac); opacity:1; width:50px; height:50px; margin:-25px 0 0 -25px;
+box-shadow:0 0 16px -2px var(--glow-ac);
+}
+.solar-planet.active .solar-emoji{ filter:drop-shadow(0 0 8px var(--glow-ac)); }
+.solar-planet.active .solar-text{ color:var(--ac); font-weight:700; }
+/* Curved orbital wrap — kicks in once the row is too tight for a flat
+   line and the "planets" need to visually settle into an arc. Amplitude
+   is small and symmetric around the row's vertical center so it never
+   grows the bar's height enough to clip, and the item order on screen
+   (left→right) still matches the click/tab order exactly. */
+@media (max-width:900px){
+/* Bar grows slightly at this breakpoint too, so the larger active-state
+   ring (50px) plus the wave offset always has vertical clearance inside
+   the track's overflow-y:hidden box — otherwise the ring edge would be
+   silently clipped top/bottom. */
+#solar-nav{ height:74px; }
+#solar-nav-spacer{ height:74px; }
+#solar-nav-track{ gap:28px; }
+.solar-planet:nth-child(1){ --solar-wave: 6px; }
+.solar-planet:nth-child(2){ --solar-wave: -3px; }
+.solar-planet:nth-child(3){ --solar-wave: -7px; }
+.solar-planet:nth-child(4){ --solar-wave: -3px; }
+.solar-planet:nth-child(5){ --solar-wave: 4px; }
+.solar-planet:nth-child(6){ --solar-wave: 8px; }
+.solar-planet:nth-child(7){ --solar-wave: 4px; }
+.solar-planet:nth-child(8){ --solar-wave: -2px; }
+}
+@media (max-width:640px){
+#solar-nav{ top:68px; height:66px; }
+#solar-nav-spacer{ height:66px; }
+#solar-nav-fixed{ padding:0 10px; gap:4px; }
+.solar-ctrl-btn .solar-ctrl-label{ display:none; }
+.solar-ctrl-btn{ padding:8px 10px; }
+#solar-nav-track{ gap:22px; padding:0 18px; }
+.solar-emoji{ font-size:19px; }
+.solar-text{ font-size:9.5px; }
+.solar-orbit-ring{ width:36px; height:36px; margin:-18px 0 0 -18px; }
+.solar-planet.active .solar-orbit-ring{ width:42px; height:42px; margin:-21px 0 0 -21px; }
+.solar-planet:nth-child(1){ --solar-wave: 7px; }
+.solar-planet:nth-child(2){ --solar-wave: -3px; }
+.solar-planet:nth-child(3){ --solar-wave: -7px; }
+.solar-planet:nth-child(4){ --solar-wave: -3px; }
+.solar-planet:nth-child(5){ --solar-wave: 4px; }
+.solar-planet:nth-child(6){ --solar-wave: 8px; }
+.solar-planet:nth-child(7){ --solar-wave: 4px; }
+.solar-planet:nth-child(8){ --solar-wave: -2px; }
+}
+@media (max-width:380px){
+/* Smallest phones (e.g. 320–375px): a touch tighter so the row still
+   fits without every planet becoming a horizontal-scroll requirement. */
+#solar-nav-track{ gap:18px; padding:0 14px; }
+.solar-emoji{ font-size:17px; }
+}
+@media (prefers-reduced-motion: reduce){
+.solar-planet, .solar-orbit-ring, .solar-emoji, .solar-ctrl-btn{ transition:none; animation:none; }
+.solar-planet:hover, .solar-planet.active{ transform:translateY(var(--solar-wave, 0px)); }
+}
 </style>
 </head>
 <body>
@@ -593,6 +744,72 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 </div>
 </div>
 </nav>
+
+<!-- NEW FEATURE: linear 3D solar-system section navigator.
+     Fixed left zone (Search + Terminal, reusing the existing command
+     palette / terminal via the hidden buttons below) + an independently
+     horizontal-scrolling row of "planets" mapped to existing section ids.
+     Does not replace or alter #navbar / .nav-links above. -->
+<nav id="solar-nav" aria-label="Solar system section navigator">
+<div id="solar-nav-fixed">
+<button type="button" id="solar-search-btn" class="solar-ctrl-btn" title="Command palette (Ctrl+K)" aria-label="Open search / command palette">
+<span aria-hidden="true">⌕</span><span class="solar-ctrl-label">Search</span>
+</button>
+<button type="button" id="solar-terminal-btn" class="solar-ctrl-btn" title="Open terminal" aria-label="Open developer terminal">
+<span aria-hidden="true">&gt;_</span><span class="solar-ctrl-label">Terminal</span>
+</button>
+</div>
+<!-- Planet order below matches the ACTUAL <section id="..."> order in this
+     file top-to-bottom: hero, about, skills, projects, github, cp, log
+     (education anchor), contact — i.e. the same set/order as the sibling
+     #navbar .nav-links list, plus Home first. This list is the single
+     source of truth the active-state JS reads from; nothing else
+     hardcodes an order. -->
+<div id="solar-nav-track" role="list">
+<a href="#hero" class="solar-planet" role="listitem" aria-label="Home">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">☀️</span>
+<span class="solar-text">Home</span>
+</a>
+<a href="#about" class="solar-planet" role="listitem" aria-label="About">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">🪐</span>
+<span class="solar-text">About</span>
+</a>
+<a href="#skills" class="solar-planet" role="listitem" aria-label="Skills">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">🛰️</span>
+<span class="solar-text">Skills</span>
+</a>
+<a href="#projects" class="solar-planet" role="listitem" aria-label="Projects">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">🌍</span>
+<span class="solar-text">Projects</span>
+</a>
+<a href="#github" class="solar-planet" role="listitem" aria-label="GitHub">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">📡</span>
+<span class="solar-text">GitHub</span>
+</a>
+<a href="#cp" class="solar-planet" role="listitem" aria-label="Competitive programming">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">⭐</span>
+<span class="solar-text">CP</span>
+</a>
+<a href="#education" class="solar-planet" role="listitem" aria-label="Education">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">🌙</span>
+<span class="solar-text">Edu</span>
+</a>
+<a href="#contact" class="solar-planet" role="listitem" aria-label="Contact">
+<span class="solar-orbit-ring" aria-hidden="true"></span>
+<span class="solar-emoji" aria-hidden="true">🚀</span>
+<span class="solar-text">Contact</span>
+</a>
+</div>
+</nav>
+<div id="solar-nav-spacer" aria-hidden="true"></div>
+
 <div id="mobile-menu">
 <a href="#hero">problem</a>
 <a href="#about">about</a>
@@ -699,10 +916,10 @@ toward Codeforces Expert.
 </ul>
 </div>
 <div>
-<div class="counter-grid">
-<div class="counter-box"><div class="num" data-count="2">0</div><div class="lbl">apps built</div></div>
-<div class="counter-box"><div class="num" data-count="14">0</div><div class="lbl">CP topics practiced</div></div>
-<div class="counter-box"><div class="num" data-count="7">0</div><div class="lbl">academic interests</div></div>
+<div class="focus-grid">
+<div class="focus-box"><div class="focus-h">Currently</div><div class="focus-b">Building the HSTU Campus App (Kotlin + Firebase) and pushing toward Codeforces Expert.</div></div>
+<div class="focus-box"><div class="focus-h">Strongest at</div><div class="focus-b">Graph theory, dynamic programming, segment trees, DSU and C++ optimization.</div></div>
+<div class="focus-box"><div class="focus-h">Aiming for</div><div class="focus-b">Software engineering roles in full-stack or mobile, alongside continued competitive programming.</div></div>
 </div>
 <p style="margin-top:22px; color:var(--ink-muted); font-size:14.5px; font-family:var(--font-mono);">
 "Code. Create. Solve. Evolve."
@@ -998,6 +1215,7 @@ toward Codeforces Expert.
 </div>
 <div class="footer-bottom">
 <span>© <span id="year"></span> MD. Yeasin Arafat — all submissions accepted.</span>
+<span id="visitor-badge"><span class="eye">👁️</span><span id="visitor-count">—</span> visitors</span>
 <span>Dinajpur, Bangladesh</span>
 </div>
 </div>
@@ -1007,6 +1225,37 @@ toward Codeforces Expert.
 </button>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---------- Persistent visitor counter ----------
+ * Backed by a serverless function at /api/visits (see /api/visits.js).
+ * The function is the single source of truth for the total; it persists
+ * in a real datastore server-side, never in the browser. sessionStorage
+ * is used only to avoid counting the same tab as multiple visits on
+ * re-renders/refreshes within one browsing session — it is never the
+ * source of the number itself. On any failure the badge fails quietly
+ * to "—" rather than showing 0/undefined/NaN. */
+(function visitorCounter(){
+const countEl = document.getElementById('visitor-count');
+if (!countEl) return;
+const alreadyCountedThisSession = (() => {
+try { return sessionStorage.getItem('visit_recorded') === '1'; } catch(e){ return false; }
+})();
+const endpoint = alreadyCountedThisSession ? '/api/visits' : '/api/visits?record=1';
+fetch(endpoint)
+.then(res => { if (!res.ok) throw new Error('bad status'); return res.json(); })
+.then(data => {
+if (typeof data.total === 'number' && Number.isFinite(data.total)){
+countEl.textContent = data.total.toLocaleString('en-US');
+try { sessionStorage.setItem('visit_recorded', '1'); } catch(e){}
+} else {
+throw new Error('malformed response');
+}
+})
+.catch(() => {
+// Graceful fallback: hide the number rather than show a broken value.
+countEl.textContent = '—';
+});
+})();
 
 const backToTop = document.getElementById('back-to-top');
 window.addEventListener('scroll', () => {
@@ -1351,7 +1600,7 @@ const isLowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurren
 /* ---------- Scroll-reveal ---------- */
 (function reveal(){
 const targets = document.querySelectorAll(
-'.section-head, .spec-card, .counter-grid, .skills-tabs, .learning-strip, ' +
+'.section-head, .spec-card, .focus-grid, .skills-tabs, .learning-strip, ' +
 '.scoreboard, #projects .card, #cp .cp-rating-card, #cp .cp-goal-card, ' +
 '.tl-item, .resume-box, .contact-grid > div, .profile-card'
 );
@@ -2144,6 +2393,68 @@ enterBtn.addEventListener('click', () => { overlay.classList.add('hidden'); mark
 skipBtn.addEventListener('click', () => { markSeen(); enterClassicMode(); });
 })();
 
+})();
+</script>
+
+<!-- NEW FEATURE script: wires the solar-nav's Search/Terminal buttons to
+     the EXISTING cmdk / terminal buttons (by dispatching a real click on
+     them, so the original handlers run completely unmodified), and drives
+     the active-planet highlighting. Fully separate IIFE — does not read
+     from or write to any variable in the script above. -->
+<script>
+(function(){
+'use strict';
+var searchBtn = document.getElementById('solar-search-btn');
+var termBtn = document.getElementById('solar-terminal-btn');
+var realSearchBtn = document.getElementById('cmdk-open-btn');
+var realTermBtn = document.getElementById('terminal-open-btn');
+
+if (searchBtn && realSearchBtn){
+searchBtn.addEventListener('click', function(){ realSearchBtn.click(); });
+}
+if (termBtn && realTermBtn){
+termBtn.addEventListener('click', function(){ realTermBtn.click(); });
+}
+
+var planetLinks = Array.prototype.slice.call(document.querySelectorAll('#solar-nav-track .solar-planet'));
+
+function setActivePlanet(id){
+planetLinks.forEach(function(a){
+a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+});
+}
+
+var targets = planetLinks
+.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); })
+.filter(Boolean);
+
+if ('IntersectionObserver' in window && targets.length){
+var visible = new Set();
+var io = new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if (entry.isIntersecting){ visible.add(entry.target.id); }
+else { visible.delete(entry.target.id); }
+});
+// Prefer the target nearest the top of the viewport among those
+// currently intersecting the "active band" (rootMargin below).
+var winner = null;
+targets.forEach(function(t){
+if (visible.has(t.id)){
+var rect = t.getBoundingClientRect();
+if (!winner || Math.abs(rect.top) < winner.dist){ winner = { id: t.id, dist: Math.abs(rect.top) }; }
+}
+});
+if (winner) setActivePlanet(winner.id);
+}, { root: null, rootMargin: '-35% 0px -50% 0px', threshold: 0 });
+targets.forEach(function(t){ io.observe(t); });
+} else {
+// No IntersectionObserver support: default to Home active, still fully usable via click.
+setActivePlanet('hero');
+}
+
+planetLinks.forEach(function(a){
+a.addEventListener('click', function(){ setActivePlanet(a.getAttribute('href').slice(1)); });
+});
 })();
 </script>
 </body>
