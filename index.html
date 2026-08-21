@@ -14,7 +14,11 @@
 <meta property="og:description" content="CSE student at HSTU, Android/web developer and competitive programmer, presented as an online-judge submission log." />
 <meta property="og:url" content="https://yea5inarafat.vercel.app/" />
 <meta property="og:type" content="website" />
+<meta property="og:image" content="https://yea5inarafat.vercel.app/profile-photo.jpg" />
 <meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="MD. Yeasin Arafat — CSE Student & Software Developer" />
+<meta name="twitter:description" content="CSE student at HSTU, Android/web developer and competitive programmer, presented as an online-judge submission log." />
+<meta name="twitter:image" content="https://yea5inarafat.vercel.app/profile-photo.jpg" />
 <script>
 (function(){
 try {
@@ -120,6 +124,12 @@ button{font-family:inherit; cursor:pointer;}
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
 outline:2px solid var(--ac); outline-offset:3px; border-radius:4px;
 }
+.skip-link{
+position:fixed; top:-100px; left:12px; z-index:1200;
+background:var(--ac); color:#fff; font-family:var(--font-mono); font-size:13px; font-weight:700;
+padding:10px 16px; border-radius:8px; transition:top .2s ease;
+}
+.skip-link:focus{ top:12px; }
 #scroll-progress{
 position:fixed; top:0; left:0; height:3px; width:0%;
 background:var(--ac); z-index:1000; transition:width .1s linear;
@@ -434,6 +444,7 @@ transition:opacity .25s ease, transform .25s ease, background .2s ease;
 .form-row{grid-template-columns:1fr;}
 section{padding:70px 0;}
 #hero{padding-top:120px;}
+.focus-grid{grid-template-columns:1fr;}
 }
 
 /* ================= UNIVERSE LAYER ================= */
@@ -521,6 +532,14 @@ background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--borde
 .planet-label{font-size:10px; padding:5px 10px;}
 #universe-topbar{display:none;}
 }
+/* Desktop cleanup: the floating "⌘K Search / Terminal" pill duplicates
+   functionality that's already reachable via Ctrl/Cmd+K and the ` key,
+   and it visually collided with the solar nav row underneath it. Hidden
+   on desktop only — tablet keeps it (no keyboard, so a visible affordance
+   still matters there) and it was already hidden on mobile above. */
+@media (min-width:901px){
+#universe-topbar{display:none;}
+}
 @media (prefers-reduced-motion: reduce){
 #universe-canvas{display:none;}
 .planet-label{position:static; opacity:1; display:inline-flex; margin:4px;}
@@ -552,6 +571,16 @@ padding:0 14px; position:relative; z-index:3; background:inherit;
 }
 #solar-nav-fixed::after{
 content:""; position:absolute; top:10px; bottom:10px; right:0; width:1px; background:var(--border);
+}
+/* Desktop cleanup: these two buttons are icon-only duplicates of the
+   floating universe-topbar pair above (both just proxy to the same
+   Ctrl/Cmd+K / backtick-driven overlays), and together with that pill
+   they read as a cluttered, redundant nav on desktop. Hidden here only;
+   tablet/mobile keep this zone since it's the sole click target for
+   Search/Terminal once the floating pill and/or keyboard aren't the
+   most natural interaction (touch devices, no physical Ctrl+K/` combo). */
+@media (min-width:901px){
+#solar-nav-fixed{ display:none; }
 }
 .solar-ctrl-btn{
 display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
@@ -685,6 +714,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 </style>
 </head>
 <body>
+<a href="#hero" class="skip-link">Skip to content</a>
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 <div id="bg-nebula" aria-hidden="true"></div>
 <div id="scroll-progress"></div>
@@ -1279,27 +1309,37 @@ countEl.textContent = '—';
 const backToTop = document.getElementById('back-to-top');
 window.addEventListener('scroll', () => {
 backToTop.classList.toggle('show', window.scrollY > 500);
-});
+}, { passive: true });
 backToTop.addEventListener('click', () => {
 window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 const progress = document.getElementById('scroll-progress');
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-const h = document.documentElement;
-const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
-progress.style.width = pct + '%';
-navbar.classList.toggle('scrolled', h.scrollTop > 8);
-});
-
 const sections = document.querySelectorAll('section[id]');
 const navA = document.querySelectorAll('.nav-links a, #mobile-menu a');
-window.addEventListener('scroll', () => {
+
+// Both scroll-driven UI updates (progress bar + active nav link) are
+// coalesced into a single rAF-throttled handler instead of two separate
+// per-scroll-event listeners — one geometry read pass, one paint per
+// frame, so fast-scrolling on mid-range Android phones stays smooth.
+let scrollTicking = false;
+function updateOnScroll(){
+scrollTicking = false;
+const h = document.documentElement;
+const denom = h.scrollHeight - h.clientHeight;
+const pct = denom > 0 ? (h.scrollTop / denom) * 100 : 0;
+progress.style.width = pct + '%';
+navbar.classList.toggle('scrolled', h.scrollTop > 8);
+
 let current = '';
 sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
 navA.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-});
+}
+window.addEventListener('scroll', () => {
+if (!scrollTicking){ scrollTicking = true; requestAnimationFrame(updateOnScroll); }
+}, { passive: true });
+updateOnScroll();
 
 const mbtn = document.getElementById('mobile-menu-btn');
 const mmenu = document.getElementById('mobile-menu');
@@ -1533,7 +1573,7 @@ renderRatingTrajectory(rd.result);
 })
 .catch(() => { /* contest count is a nice-to-have; rating card still stands */ });
 })
-.then(() => fetch(`https://codeforces.com/api/user.status?handle=${HANDLE}&from=1&count=10000`))
+.then(() => fetch(`https://codeforces.com/api/user.status?handle=${HANDLE}&from=1&count=10000`)
 .then(r => r.json())
 .then(sd => {
 if (sd.status !== 'OK') return;
@@ -1545,7 +1585,8 @@ solved.add(`${sub.problem.contestId ?? sub.problem.problemsetName}-${sub.problem
 });
 setText('cf-solved', solved.size);
 })
-.catch(() => { /* solved count is best-effort */ })
+.catch(() => { /* solved count is best-effort; the rating/rank data above already rendered */ })
+)
 .catch(showError);
 }
 
