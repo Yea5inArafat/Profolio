@@ -50,6 +50,7 @@
 "sameAs": [
 "https://github.com/Yea5inArafat",
 "https://codeforces.com/profile/Arafat02",
+"https://codeforces.com/profile/uiarafat02",
 "https://leetcode.com/u/Yea5inArafat/",
 "https://atcoder.jp/users/Yea5inArafat",
 "https://profiles.topcoder.com/yea5inarafat",
@@ -345,6 +346,23 @@ display:flex; align-items:center; justify-content:center; border:1px solid var(-
 .focus-box{padding:16px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface);}
 .focus-box .focus-h{font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--ac); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
 .focus-box .focus-b{font-size:12.5px; color:var(--ink-muted); line-height:1.5;}
+/* Latest Tech News — sits in the about-lower right column, below the
+   focus-grid/quote, filling the space that column leaves empty on
+   desktop (the profile-card column is taller). Purely additive. */
+.news-panel{margin-top:24px; padding-top:20px; border-top:1px solid var(--border);}
+.news-panel-title{font-size:13px; font-family:var(--font-mono); font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.04em; margin-bottom:12px;}
+.news-list{display:flex; flex-direction:column; gap:12px;}
+.news-item{display:flex; gap:12px; border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--surface); align-items:flex-start;}
+.news-thumb{width:56px; height:56px; border-radius:8px; object-fit:cover; flex-shrink:0; background:var(--surface-2);}
+.news-body{min-width:0; flex:1;}
+.news-title{font-size:13px; font-weight:700; color:var(--ink); line-height:1.35; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.news-summary{font-size:11.5px; color:var(--ink-muted); line-height:1.45; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.news-meta{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim);}
+.news-meta a{color:var(--ac); font-weight:600;}
+@media (max-width:760px){
+.news-thumb{width:44px; height:44px;}
+.news-item{padding:10px;}
+}
 .rating-legend{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:28px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);}
 .rating-legend .lg{display:flex; align-items:center; gap:6px;}
 .rating-legend .sw{width:10px; height:10px; border-radius:50%;}
@@ -375,6 +393,7 @@ border-bottom:1px solid var(--border); align-items:center;
 }
 .sb-row:last-child{border-bottom:none;}
 .sb-id{font-family:var(--font-mono); font-weight:700; font-size:16px; color:var(--ac);}
+.sb-thumb{display:block; width:100%; max-width:220px; height:56px; border-radius:8px; margin-bottom:10px;}
 .sb-main h4{font-size:16px; margin-bottom:5px;}
 .sb-main p{color:var(--ink-muted); font-size:13.5px; margin-bottom:9px;}
 .sb-tags{display:flex; flex-wrap:wrap; gap:6px;}
@@ -663,6 +682,29 @@ transition:opacity .5s ease, visibility .5s ease;
 #universe-loading .ul-bar-fill{height:100%; width:0%; background:var(--ac); transition:width .25s ease;}
 #universe-loading .ul-actions{display:flex; gap:12px; margin-top:6px;}
 #universe-loading .ul-actions button{opacity:1; pointer-events:auto;}
+/* Personalized loading content — time-based greeting, subtle falling
+   flower petals, and a random original avatar. Purely additive to the
+   existing loading screen; the global prefers-reduced-motion rule above
+   already neutralizes the keyframes below for those users, and the JS
+   also skips generating petals entirely for them. */
+.ul-greeting{font-family:var(--font-mono); font-size:clamp(15px,3.6vw,19px); font-weight:700; color:var(--ink); letter-spacing:.01em;}
+.ul-loading-text{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); letter-spacing:.05em; margin-top:-8px;}
+.ul-anime-wrap{
+width:84px; height:84px; border-radius:50%; overflow:hidden; flex-shrink:0;
+border:1px solid var(--border); background:var(--surface-2);
+box-shadow:0 0 0 4px var(--ac-soft);
+opacity:0; transform:scale(.85); animation:ulAnimeIn .5s ease .1s forwards;
+}
+.ul-anime-wrap svg{width:100%; height:100%; display:block;}
+@keyframes ulAnimeIn{ to{opacity:1; transform:scale(1);} }
+.ul-flowers{position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none;}
+.ul-petal{position:absolute; top:-24px; will-change:transform,opacity; animation:ulPetalFall linear infinite; line-height:1;}
+@keyframes ulPetalFall{
+0%{transform:translateY(0) translateX(0) rotate(0deg); opacity:0;}
+8%{opacity:.6;}
+90%{opacity:.6;}
+100%{transform:translateY(120vh) translateX(var(--drift,20px)) rotate(360deg); opacity:0;}
+}
 #cmdk-overlay, #terminal-overlay{
 position:fixed; inset:0; z-index:970; background:rgba(6,9,17,.55); backdrop-filter:blur(4px);
 display:none; align-items:flex-start; justify-content:center; padding-top:14vh;
@@ -961,6 +1003,9 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 
 <!-- Universe loading / intro sequence -->
 <div id="universe-loading" role="status" aria-live="polite">
+<div class="ul-flowers" id="ul-flowers" aria-hidden="true"></div>
+<div class="ul-greeting" id="ul-greeting"></div>
+<div class="ul-anime-wrap" id="ul-anime-wrap" aria-hidden="true"></div>
 <div class="ul-title">INITIALIZING UNIVERSE</div>
 <div class="ul-name">MD. YEASIN ARAFAT</div>
 <div class="ul-bar"><div class="ul-bar-fill" id="ul-bar-fill"></div></div>
@@ -970,6 +1015,7 @@ box-shadow:0 0 16px -2px var(--glow-ac);
 <div class="ul-step" id="ul-step-field"><span>Star field</span><span>—</span></div>
 <div class="ul-step" id="ul-step-data"><span>Live data links</span><span>—</span></div>
 </div>
+<p class="ul-loading-text" id="ul-loading-text">Loading portfolio…</p>
 <div class="ul-actions">
 <button class="btn btn-primary" id="enter-universe-btn">ENTER THE UNIVERSE</button>
 <button class="btn btn-ghost" id="skip-universe-btn">Skip — classic view</button>
@@ -1222,6 +1268,11 @@ toward Codeforces Expert.
 <p style="margin-top:22px; color:var(--ink-muted); font-size:14.5px; font-family:var(--font-mono);">
 "Code. Create. Solve. Evolve."
 </p>
+<div class="news-panel" id="news-panel">
+<h4 class="news-panel-title">Latest Tech News</h4>
+<div id="news-status" class="skel" role="status" aria-live="polite" style="font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim);">Loading tech news…</div>
+<div class="news-list" id="news-list"></div>
+</div>
 </div>
 </div>
 </div>
@@ -1299,7 +1350,7 @@ toward Codeforces Expert.
 <div class="section-head">
 <div class="case-label"><span class="id">case_003</span> / scoreboard.tsv</div>
 <h2 class="section-title">Scoreboard</h2>
-<p class="section-sub">One problem publicly submitted so far. HSTU Campus App and the Mess Management System are built, but their repos aren't public yet — they'll show up here once they are.</p>
+<p class="section-sub">Two problems publicly submitted so far. HSTU Campus App and the Mess Management System are built, but their repos aren't public yet — they'll show up here once they are.</p>
 </div>
 <div class="scoreboard">
 <div class="sb-head"><div>ID</div><div>Problem</div><div>Verdict</div><div>Links</div></div>
@@ -1314,6 +1365,30 @@ toward Codeforces Expert.
 <div class="sb-links">
 <a class="btn btn-ghost btn-sm" href="https://github.com/Yea5inArafat/Profolio" target="_blank" rel="noopener noreferrer">Code</a>
 <a class="btn btn-ghost btn-sm" href="https://yea5inarafat.vercel.app/" target="_blank" rel="noopener noreferrer">Live</a>
+</div>
+</div>
+<div class="sb-row" data-cat="web">
+<div class="sb-id">B</div>
+<div class="sb-main">
+<svg class="sb-thumb" viewBox="0 0 220 64" role="img" aria-label="Preview: a starfield with an orbiting planet, representing the Universe-edition portfolio UI">
+<rect width="220" height="64" rx="8" fill="var(--surface-2)"></rect>
+<ellipse cx="34" cy="32" rx="26" ry="7" fill="none" stroke="var(--ac)" stroke-opacity="0.45"></ellipse>
+<circle cx="34" cy="32" r="13" fill="var(--ac)" fill-opacity="0.85"></circle>
+<circle cx="72" cy="14" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="98" cy="42" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="124" cy="11" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="146" cy="46" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="170" cy="19" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="193" cy="39" r="1.6" fill="var(--ink-dim)"></circle>
+<circle cx="207" cy="16" r="1.6" fill="var(--ink-dim)"></circle>
+</svg>
+<h4>Portfolio — Universe Edition (WIP)</h4>
+<p>A more immersive rebuild of this same portfolio — animated star-field entrance, a command-palette (⌘K) search, and a one-click toggle back to the classic view — running on the same live Codeforces and GitHub data.</p>
+<div class="sb-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+</div>
+<div class="sb-verdict run">In development</div>
+<div class="sb-links">
+<a class="btn btn-ghost btn-sm" href="https://uiarafat02.vercel.app/" target="_blank" rel="noopener noreferrer">Live Demo</a>
 </div>
 </div>
 </div>
@@ -1342,7 +1417,7 @@ toward Codeforces Expert.
 <div class="section-head">
 <div class="case-label"><span class="id">case_004</span> / rating.json</div>
 <h2 class="section-title">Competitive programming</h2>
-<p class="section-sub">Codeforces handle: <a href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ac); font-weight:600;">Arafat02 ↗</a> <span style="color:var(--ink-dim); font-size:13px;">(secondary handle: <a href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ink-muted);">Arafat02 ↗</a> <span class="tag" style="color:var(--r-pupil); border-color:var(--r-pupil); background:var(--ac-soft);">Pupil</span>)</span></p>
+<p class="section-sub">Codeforces handle: <a href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ac); font-weight:600;">Arafat02 ↗</a> <span style="color:var(--ink-dim); font-size:13px;">(secondary handle: <a href="https://codeforces.com/profile/uiarafat02" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); color:var(--ink-muted);">uiarafat02 ↗</a> <span class="tag" style="color:var(--r-pupil); border-color:var(--r-pupil); background:var(--ac-soft);">Pupil</span>)</span></p>
 </div>
 <div class="cp-grid">
 <div class="cp-rating-card">
@@ -1378,7 +1453,7 @@ toward Codeforces Expert.
 </div>
 </div>
 <!-- Codeforces "Tags Solved" analytics — built entirely from live
-     user.status data for both handles (Arafat02 + Arafat02), no
+     user.status data for both handles (Arafat02 + uiarafat02), no
      hardcoded numbers. See cfTagsAnalytics() below for the fetch/aggregate
      logic; this block is markup + presentation only. -->
 <div class="cf-tags-card" id="cf-tags-card">
@@ -1552,7 +1627,7 @@ toward Codeforces Expert.
 <div class="tl-item">
 <div class="tl-date">🏅 May 2026 · Codeforces</div>
 <h4>Reached Pupil rank</h4>
-<div class="tl-org">Codeforces · handle Arafat02</div>
+<div class="tl-org">Codeforces · handle uiarafat02</div>
 <p class="tl-desc">Ranked up to Pupil on the secondary handle — one step further on the road to Expert.</p>
 <div class="tag-row"><span class="tag" style="color:var(--r-pupil); border-color:var(--r-pupil);">Pupil</span><span class="tag">Codeforces</span></div>
 </div>
@@ -1631,7 +1706,7 @@ toward Codeforces Expert.
 </div>
 <div class="contact-info-item">
 <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="9.5" width="5" height="12" rx="1.6"/><rect x="9.5" y="4.5" width="5" height="17" rx="1.6"/><rect x="17.5" y="1.5" width="5" height="20" rx="1.6"/></svg></div>
-<div><div class="lbl">Codeforces</div><div class="val"><a class="val-link" href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer">Arafat02 <span class="ext-ico">↗</span></a></div><div style="font-size:11.5px; color:var(--ink-dim); margin-top:2px;">Secondary: <a class="val-link" style="font-size:11.5px;" href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer">Arafat02</a></div></div>
+<div><div class="lbl">Codeforces</div><div class="val"><a class="val-link" href="https://codeforces.com/profile/Arafat02" target="_blank" rel="noopener noreferrer">Arafat02 <span class="ext-ico">↗</span></a></div><div style="font-size:11.5px; color:var(--ink-dim); margin-top:2px;">Secondary: <a class="val-link" style="font-size:11.5px;" href="https://codeforces.com/profile/uiarafat02" target="_blank" rel="noopener noreferrer">uiarafat02</a></div></div>
 </div>
 <div class="contact-info-item">
 <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></div>
@@ -1889,7 +1964,7 @@ window.location.href = mailto;
 // never to fabricated numbers.
 (function trackCodeforcesStats(){
 const HANDLE = 'Arafat02';
-const SECOND_HANDLE = 'Arafat02';
+const SECOND_HANDLE = 'uiarafat02';
 const REFRESH_MS = 5 * 60 * 1000; // refresh every 5 minutes
 
 const rankColor = {
@@ -2016,7 +2091,7 @@ if (stillLoading && /Loading/.test(stillLoading.textContent)) showError();
 })();
 
 // Codeforces "Tags Solved" analytics — id="cf-tags-script".
-// Fetches accepted submissions for BOTH handles (Arafat02 + Arafat02),
+// Fetches accepted submissions for BOTH handles (Arafat02 + uiarafat02),
 // dedupes by contestId/problemsetName + index so a problem solved on either
 // handle (or resubmitted many times) is only ever counted once, tallies the
 // tags on each unique solved problem, and renders a donut chart + legend
@@ -2025,7 +2100,7 @@ if (stillLoading && /Loading/.test(stillLoading.textContent)) showError();
 // instead of any placeholder numbers.
 (function cfTagsAnalytics(){
 const HANDLE = 'Arafat02';
-const SECOND_HANDLE = 'Arafat02';
+const SECOND_HANDLE = 'uiarafat02';
 const cardEl = document.getElementById('cf-tags-card');
 const summaryEl = document.getElementById('cf-tags-summary');
 const bodyEl = document.getElementById('cf-tags-body');
@@ -2369,7 +2444,7 @@ ${lang ? `<span><span class="dot" style="display:inline-block;width:8px;height:8
 <span>${updated}</span>
 </div>
 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-<a class="btn btn-ghost btn-sm" href="${githubHref}" target="_blank" rel="noopener noreferrer" aria-label="View ${repo.name} on GitHub">GitHub</a>
+<a class="btn btn-ghost btn-sm" href="${githubHref}" target="_blank" rel="noopener noreferrer" aria-label="View ${repo.name} on GitHub">View Repository</a>
 ${liveBtn}
 </div>
 </div>`;
@@ -2456,6 +2531,163 @@ fallbackAfterFailure();
 const initialCache = readCache();
 if (initialCache){
 renderRepos(initialCache.repos, { stale: true });
+}
+load(0);
+})();
+
+// Latest Tech News — About section. Served through /api/tech-news (RSS
+// aggregation, cached at the CDN for ~30 min). Same fallback shape as the
+// GitHub repos widget: fresh API -> local cache shown instantly + quietly
+// refreshed -> friendly empty/error state. Never invents articles.
+(function loadTechNews(){
+const API_URL = '/api/tech-news';
+const STORAGE_KEY = 'tech-news-cache-v1';
+const FETCH_TIMEOUT_MS = 7000;
+const HARD_TIMEOUT_MS = 9000;
+const MAX_RETRIES = 1;
+
+const statusEl = document.getElementById('news-status');
+const listEl = document.getElementById('news-list');
+if (!statusEl || !listEl) return;
+
+function readCache(){
+try {
+const raw = localStorage.getItem(STORAGE_KEY);
+if (!raw) return null;
+const parsed = JSON.parse(raw);
+if (!parsed || !Array.isArray(parsed.articles) || !parsed.articles.length) return null;
+return parsed;
+} catch (e){ return null; }
+}
+
+function writeCache(articles){
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ articles: articles, savedAt: Date.now() })); }
+catch (e){ /* storage unavailable/full — non-fatal */ }
+}
+
+function isUsableUrl(value){
+if (typeof value !== 'string') return false;
+try { const p = new URL(value.trim()); return p.protocol === 'https:' || p.protocol === 'http:'; }
+catch (e){ return false; }
+}
+
+function formatPublished(iso){
+if (!iso) return '';
+const d = new Date(iso);
+if (isNaN(d.getTime())) return '';
+const diffHours = Math.floor((Date.now() - d.getTime()) / 3600000);
+if (diffHours < 1) return 'Just now';
+if (diffHours < 24) return `${diffHours}h ago`;
+const diffDays = Math.floor(diffHours / 24);
+if (diffDays < 7) return `${diffDays}d ago`;
+return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+}
+
+function renderNews(articles, opts){
+opts = opts || {};
+statusEl.classList.remove('skel');
+if (!Array.isArray(articles) || articles.length === 0){
+statusEl.textContent = 'No tech news available right now.';
+listEl.innerHTML = '';
+return;
+}
+const note = opts.stale ? 'showing cached headlines' : 'live headlines';
+statusEl.textContent = note;
+listEl.innerHTML = articles.map(article => {
+const title = String(article.title || 'Untitled').replace(/[<>]/g, '');
+const summary = article.summary ? String(article.summary).replace(/[<>]/g, '') : '';
+const source = article.source ? String(article.source).replace(/[<>]/g, '') : 'Source';
+const when = formatPublished(article.publishedAt);
+const href = isUsableUrl(article.url) ? article.url : null;
+const thumb = isUsableUrl(article.thumbnail)
+? `<img class="news-thumb" src="${article.thumbnail}" alt="" loading="lazy" onerror="this.remove();">`
+: '';
+return `<div class="news-item">
+${thumb}
+<div class="news-body">
+<div class="news-title">${title}</div>
+${summary ? `<div class="news-summary">${summary}</div>` : ''}
+<div class="news-meta">
+<span>${source}</span>
+${when ? `<span>· ${when}</span>` : ''}
+${href ? `<a href="${href}" target="_blank" rel="noopener noreferrer">Read More ↗</a>` : ''}
+</div>
+</div>
+</div>`;
+}).join('');
+}
+
+function showFriendlyError(){
+statusEl.classList.remove('skel');
+statusEl.innerHTML = 'Tech news is temporarily unavailable. <button type="button" id="news-retry-btn" class="btn btn-ghost btn-sm" style="margin-left:6px; padding:3px 10px; font-size:11px;">Retry</button>';
+listEl.innerHTML = '';
+const retryBtn = document.getElementById('news-retry-btn');
+if (retryBtn) retryBtn.addEventListener('click', () => {
+statusEl.classList.add('skel');
+statusEl.textContent = 'Loading tech news…';
+load(0);
+});
+}
+
+function fallbackAfterFailure(){
+const cached = readCache();
+if (cached){
+renderNews(cached.articles, { stale: true });
+} else {
+showFriendlyError();
+}
+}
+
+function load(attempt){
+attempt = attempt || 0;
+let settled = false;
+
+const hardTimeout = setTimeout(() => {
+if (settled) return;
+settled = true;
+fallbackAfterFailure();
+}, HARD_TIMEOUT_MS);
+
+const controller = new AbortController();
+const abortTimer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+fetch(API_URL, { headers: { Accept: 'application/json' }, signal: controller.signal })
+.then(r => r.json().catch(() => null).then(body => ({ ok: r.ok, status: r.status, body: body })))
+.then(({ ok, status, body }) => {
+clearTimeout(abortTimer);
+if (settled) return;
+if (ok && body && Array.isArray(body.articles) && body.articles.length){
+settled = true;
+clearTimeout(hardTimeout);
+writeCache(body.articles);
+renderNews(body.articles);
+return;
+}
+const transient = status === 429 || status === 502 || status === 504;
+if (transient && attempt < MAX_RETRIES){
+setTimeout(() => { if (!settled) load(attempt + 1); }, 1500);
+return;
+}
+settled = true;
+clearTimeout(hardTimeout);
+fallbackAfterFailure();
+})
+.catch(() => {
+clearTimeout(abortTimer);
+if (settled) return;
+if (attempt < MAX_RETRIES){
+setTimeout(() => { if (!settled) load(attempt + 1); }, 1500);
+return;
+}
+settled = true;
+clearTimeout(hardTimeout);
+fallbackAfterFailure();
+});
+}
+
+const initialCache = readCache();
+if (initialCache){
+renderNews(initialCache.articles, { stale: true });
 }
 load(0);
 })();
@@ -3250,8 +3482,78 @@ const seen = (() => { try { return localStorage.getItem('universe_intro_seen') =
 
 function markSeen(){ try { localStorage.setItem('universe_intro_seen', '1'); } catch(e){} }
 
+/* ---- Personalized loading content -------------------------------------
+   Time-based greeting, a few subtle drifting flower petals, and a random
+   original character avatar. Everything here is self-contained (inline
+   SVG, no image/network requests) so it can never hang the loading
+   screen or add load time, and it re-picks fresh content on every call —
+   i.e. every time this screen is actually shown, not just once ever. */
+function renderLoadingGreeting(){
+const el = document.getElementById('ul-greeting');
+if (!el) return;
+const hour = new Date().getHours();
+let text, emoji;
+if (hour >= 5 && hour < 12){ text = 'Good Morning'; emoji = '☀️'; }
+else if (hour >= 12 && hour < 17){ text = 'Good Afternoon'; emoji = '🌸'; }
+else if (hour >= 17 && hour < 21){ text = 'Good Evening'; emoji = '🌆'; }
+else { text = 'Good Night'; emoji = '🌙'; }
+el.textContent = text + ' ' + emoji;
+}
+
+function renderLoadingPetals(){
+const wrap = document.getElementById('ul-flowers');
+if (!wrap) return;
+wrap.innerHTML = '';
+if (reduceMotion) return; // keep the screen static/clutter-free for these users
+const glyphs = ['🌸', '🌼', '🌷'];
+const count = isSmall ? 7 : 12;
+const frag = document.createDocumentFragment();
+for (let i = 0; i < count; i++){
+const petal = document.createElement('span');
+petal.className = 'ul-petal';
+petal.textContent = glyphs[i % glyphs.length];
+petal.style.left = (Math.random() * 100) + '%';
+petal.style.fontSize = (12 + Math.random() * 8) + 'px';
+petal.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+petal.style.animationDuration = (6 + Math.random() * 5) + 's';
+petal.style.animationDelay = (Math.random() * 5) + 's';
+frag.appendChild(petal);
+}
+wrap.appendChild(frag);
+}
+
+// Small set of original, hand-drawn chibi-style avatars (not any existing
+// franchise character) so there's no copyright/likeness risk and nothing
+// to fetch over the network. Purely decorative — aria-hidden on the wrap.
+const ANIME_AVATARS = [
+'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="var(--surface-2)"/><path d="M18 46 Q50 6 82 46 Q80 28 50 22 Q20 28 18 46Z" fill="#ff6f91"/><path d="M16 48 Q12 84 30 94 L32 52Z" fill="#ff6f91"/><path d="M84 48 Q88 84 70 94 L68 52Z" fill="#ff6f91"/><circle cx="50" cy="58" r="29" fill="#ffd9c2"/><circle cx="39" cy="60" r="4" fill="#33283a"/><circle cx="61" cy="60" r="4" fill="#33283a"/><circle cx="39" cy="58" r="1.3" fill="#fff"/><circle cx="61" cy="58" r="1.3" fill="#fff"/><path d="M44 71 Q50 76 56 71" stroke="#c9765a" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="29" cy="66" r="4.5" fill="#ff9eb0" opacity=".55"/><circle cx="71" cy="66" r="4.5" fill="#ff9eb0" opacity=".55"/></svg>',
+'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="var(--surface-2)"/><path d="M20 44 Q50 10 80 44 Q76 24 50 20 Q24 24 20 44Z" fill="#2fb8b0"/><path d="M18 40 Q10 55 22 58 Q20 46 18 40Z" fill="#2fb8b0"/><path d="M82 40 Q90 55 78 58 Q80 46 82 40Z" fill="#2fb8b0"/><circle cx="50" cy="58" r="29" fill="#ffdcc4"/><path d="M35 54 L45 54" stroke="#2a3b3c" stroke-width="3.4" stroke-linecap="round"/><path d="M55 54 L65 54" stroke="#2a3b3c" stroke-width="3.4" stroke-linecap="round"/><path d="M44 72 Q50 75 56 72" stroke="#c9765a" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="29" cy="66" r="4" fill="#7fe0da" opacity=".4"/><circle cx="71" cy="66" r="4" fill="#7fe0da" opacity=".4"/></svg>',
+'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="var(--surface-2)"/><ellipse cx="14" cy="70" rx="9" ry="20" fill="#8b6fe0"/><ellipse cx="86" cy="70" rx="9" ry="20" fill="#8b6fe0"/><path d="M18 46 Q50 8 82 46 Q80 26 50 21 Q20 26 18 46Z" fill="#8b6fe0"/><circle cx="50" cy="58" r="29" fill="#ffe0cc"/><circle cx="39" cy="60" r="4" fill="#382b52"/><circle cx="61" cy="60" r="4" fill="#382b52"/><circle cx="39" cy="58" r="1.3" fill="#fff"/><circle cx="61" cy="58" r="1.3" fill="#fff"/><path d="M45 72 Q50 75 55 72" stroke="#c9765a" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="29" cy="66" r="4.5" fill="#c6b3ff" opacity=".5"/><circle cx="71" cy="66" r="4.5" fill="#c6b3ff" opacity=".5"/></svg>',
+'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="var(--surface-2)"/><path d="M18 45 Q50 8 82 45 Q78 26 50 21 Q22 26 18 45Z" fill="#f2a33c"/><path d="M16 46 Q10 70 26 80 L28 50Z" fill="#f2a33c"/><path d="M84 46 Q90 70 74 80 L72 50Z" fill="#f2a33c"/><circle cx="50" cy="58" r="29" fill="#ffdcc0"/><circle cx="39" cy="60" r="4" fill="#4a3420"/><circle cx="61" cy="60" r="4" fill="#4a3420"/><circle cx="39" cy="58" r="1.3" fill="#fff"/><circle cx="61" cy="58" r="1.3" fill="#fff"/><path d="M44 72 Q50 76 56 72" stroke="#c9765a" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="29" cy="66" r="4" fill="#ffcf9e" opacity=".5"/><circle cx="71" cy="66" r="4" fill="#ffcf9e" opacity=".5"/><path d="M70 26 l2.4 5 5.4.5-4 3.7 1.1 5.4L70 37.8 65.1 40.6l1.1-5.4-4-3.7 5.4-.5z" fill="#ffe27a"/></svg>'
+];
+function renderLoadingAvatar(){
+const wrap = document.getElementById('ul-anime-wrap');
+if (!wrap || !ANIME_AVATARS.length) return;
+wrap.innerHTML = ANIME_AVATARS[Math.floor(Math.random() * ANIME_AVATARS.length)];
+}
+
+renderLoadingGreeting();
+renderLoadingPetals();
+renderLoadingAvatar();
+
 if (seen || reduceMotion){
+// Repeat visits (not reduced-motion): still give a brief refreshed
+// personalized flash — new greeting/character each time — rather than
+// an instant skip, since those should feel "live" on every load. Kept
+// short so it never meaningfully adds to load time.
+// Reduced-motion: unchanged instant hide, exactly as before.
+if (reduceMotion){
 overlay.classList.add('hidden');
+markSeen();
+return;
+}
+if (fill) fill.style.width = '100%';
+setTimeout(() => overlay.classList.add('hidden'), 650);
 markSeen();
 return;
 }
